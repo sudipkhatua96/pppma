@@ -1,0 +1,473 @@
+{
+  "results": [
+    {
+      "id": "i-1",
+      "rollNo": "MA-2026-101",
+      "name": "Anish Roy",
+      "school": "Mayapur Primary School",
+      "classLevel": "Class I",
+      "marks": 95,
+      "rank": 1,
+      "status": "Passed",
+      "phone": "9876543201"
+    },
+    {
+      "id": "i-2",
+      "rollNo": "MA-2026-102",
+      "name": "Aditi Sheet",
+      "school": "Palaspai Primary School",
+      "classLevel": "Class I",
+      "marks": 90,
+      "rank": 2,
+      "status": "Passed",
+      "phone": ""
+    },
+    {
+      "id": "ii-1",
+      "rollNo": "MA-2026-201",
+      "name": "Shamik Das",
+      "school": "Radhanagar Primary School",
+      "classLevel": "Class II",
+      "marks": 93,
+      "rank": 1,
+      "status": "Passed",
+      "phone": "9876543202"
+    },
+    {
+      "id": "ii-2",
+      "rollNo": "MA-2026-202",
+      "name": "Sonia Mandal",
+      "school": "Khanakul Primary School",
+      "classLevel": "Class II",
+      "marks": 88,
+      "rank": 2,
+      "status": "Passed",
+      "phone": ""
+    },
+    {
+      "id": "iii-1",
+      "rollNo": "MA-2026-301",
+      "name": "Subhasree Patra",
+      "school": "Mayapur Primary School",
+      "classLevel": "Class III",
+      "marks": 94,
+      "rank": 1,
+      "status": "Passed",
+      "phone": "9876543203"
+    },
+    {
+      "id": "iii-2",
+      "rollNo": "MA-2026-302",
+      "name": "Debasis Jana",
+      "school": "Palaspai Primary School",
+      "classLevel": "Class III",
+      "marks": 87,
+      "rank": 2,
+      "status": "Passed",
+      "phone": ""
+    },
+    {
+      "id": "iv-1",
+      "rollNo": "MA-2026-401",
+      "name": "Arpan Samanta",
+      "school": "Arambagh Primary School",
+      "classLevel": "Class IV",
+      "marks": 96,
+      "rank": 1,
+      "status": "Passed",
+      "phone": "9876543204"
+    },
+    {
+      "id": "iv-2",
+      "rollNo": "MA-2026-402",
+      "name": "Ananya Ghosh",
+      "school": "Radhanagar Primary School",
+      "classLevel": "Class IV",
+      "marks": 89,
+      "rank": 2,
+      "status": "Passed",
+      "phone": ""
+    },
+    {
+      "id": "v-1",
+      "rollNo": "MA-2026-501",
+      "name": "Sourav Das",
+      "school": "Palaspai High School",
+      "classLevel": "Class V",
+      "marks": 92,
+      "rank": 1,
+      "status": "Passed",
+      "phone": "9876543210"
+    },
+    {
+      "id": "v-2",
+      "rollNo": "MA-2026-502",
+      "name": "Priyanka Sen",
+      "school": "Khanakul Krishnanagar High School",
+      "classLevel": "Class V",
+      "marks": 89,
+      "rank": 2,
+      "status": "Passed",
+      "phone": "9876543211"
+    },
+    {
+      "id": "v-3",
+      "rollNo": "MA-2026-503",
+      "name": "Aniket Mandal",
+      "school": "Radhanagar High School",
+      "classLevel": "Class V",
+      "marks": 87,
+      "rank": 3,
+      "status": "Passed",
+      "phone": "9876543212"
+    },
+    {
+      "id": "v-4",
+      "rollNo": "MA-2026-504",
+      "name": "Shreya Samanta",
+      "school": "Palaspai High School",
+      "classLevel": "Class V",
+      "marks": 74,
+      "rank": 4,
+      "status": "Passed",
+      "phone": ""
+    },
+    {
+      "id": "v-5",
+      "rollNo": "MA-2026-505",
+      "name": "Rishav Dutta",
+      "school": "Mayapur High School",
+      "classLevel": "Class V",
+      "marks": 68,
+      "rank": 5,
+      "status": "Passed",
+      "phone": ""
+    },
+    {
+      "id": "vi-1",
+      "rollNo": "MA-2026-601",
+      "name": "Rahul Khatua",
+      "school": "Mayapur High School",
+      "classLevel": "Class VI",
+      "marks": 95,
+      "rank": 1,
+      "status": "Passed",
+      "phone": "9876543214"
+    },
+    {
+      "id": "vi-2",
+      "rollNo": "MA-2026-602",
+      "name": "Moumita Ghosh",
+      "school": "Arambagh Girls High School",
+      "classLevel": "Class VI",
+      "marks": 91,
+      "rank": 2,
+      "status": "Passed",
+      "phone": "9876543215"
+    },
+    {
+      "id": "vi-3",
+      "rollNo": "MA-2026-603",
+      "name": "Debabrata Patra",
+      "school": "Mayapur High School",
+      "classLevel": "Class VI",
+      "marks": 90,
+      "rank": 3,
+      "status": "Passed",
+      "phone": "9876543216"
+    },
+    {
+      "id": "vi-4",
+      "rollNo": "MA-2026-604",
+      "name": "Suman Banerjee",
+      "school": "Radhanagar High School",
+      "classLevel": "Class VI",
+      "marks": 42,
+      "rank": 4,
+      "status": "Passed",
+      "phone": ""
+    },
+    {
+      "id": "vii-1",
+      "rollNo": "MA-2026-701",
+      "name": "Subhadip Dutta",
+      "school": "Harinkhola High School",
+      "classLevel": "Class VII",
+      "marks": 96,
+      "rank": 1,
+      "status": "Passed",
+      "phone": "9876543218"
+    },
+    {
+      "id": "vii-2",
+      "rollNo": "MA-2026-702",
+      "name": "Tanaya Adhikari",
+      "school": "Arambagh Girls High School",
+      "classLevel": "Class VII",
+      "marks": 94,
+      "rank": 2,
+      "status": "Passed",
+      "phone": "9876543219"
+    },
+    {
+      "id": "vii-3",
+      "rollNo": "MA-2026-703",
+      "name": "Srijan Roy",
+      "school": "Radhanagar High School",
+      "classLevel": "Class VII",
+      "marks": 91,
+      "rank": 3,
+      "status": "Passed",
+      "phone": ""
+    },
+    {
+      "id": "vii-4",
+      "rollNo": "MA-2026-704",
+      "name": "Dipali Adhikary",
+      "school": "Palaspai High School",
+      "classLevel": "Class VII",
+      "marks": 82,
+      "rank": 4,
+      "status": "Passed",
+      "phone": ""
+    },
+    {
+      "id": "viii-1",
+      "rollNo": "MA-2026-801",
+      "name": "Arpita Maiti",
+      "school": "Palaspai High School",
+      "classLevel": "Class VIII",
+      "marks": 98,
+      "rank": 1,
+      "status": "Passed",
+      "phone": "9876543221"
+    },
+    {
+      "id": "viii-2",
+      "rollNo": "MA-2026-802",
+      "name": "Souvik Hazra",
+      "school": "Khanakul Krishnanagar High School",
+      "classLevel": "Class VIII",
+      "marks": 95,
+      "rank": 2,
+      "status": "Passed",
+      "phone": "9876543222"
+    },
+    {
+      "id": "viii-3",
+      "rollNo": "MA-2026-803",
+      "name": "Sneha Pal",
+      "school": "Arambagh Girls High School",
+      "classLevel": "Class VIII",
+      "marks": 93,
+      "rank": 3,
+      "status": "Passed",
+      "phone": "9876543223"
+    },
+    {
+      "id": "viii-4",
+      "rollNo": "MA-2026-804",
+      "name": "Rana Mondal",
+      "school": "Mayapur High School",
+      "classLevel": "Class VIII",
+      "marks": 15,
+      "rank": 4,
+      "status": "Failed",
+      "phone": ""
+    },
+    {
+      "id": "viii-5",
+      "rollNo": "MA-2026-805",
+      "name": "Sayan Samanta",
+      "school": "Harinkhola High School",
+      "classLevel": "Class VIII",
+      "marks": 0,
+      "rank": 5,
+      "status": "Absent",
+      "phone": ""
+    },
+    {
+      "id": "ix-1",
+      "rollNo": "MA-2026-901",
+      "name": "Prasenjit Sheet",
+      "school": "Khanakul High School",
+      "classLevel": "Class IX",
+      "marks": 94,
+      "rank": 1,
+      "status": "Passed",
+      "phone": "9876543209"
+    },
+    {
+      "id": "ix-2",
+      "rollNo": "MA-2026-902",
+      "name": "Tania Banerjee",
+      "school": "Arambagh High School",
+      "classLevel": "Class IX",
+      "marks": 88,
+      "rank": 2,
+      "status": "Passed",
+      "phone": ""
+    },
+    {
+      "id": "x-1",
+      "rollNo": "MA-2026-1001",
+      "name": "Kushal Sen",
+      "school": "Mayapur High School",
+      "classLevel": "Class X",
+      "marks": 97,
+      "rank": 1,
+      "status": "Passed",
+      "phone": "9876543217"
+    },
+    {
+      "id": "x-2",
+      "rollNo": "MA-2026-1002",
+      "name": "Sudipa Midya",
+      "school": "Harinkhola High School",
+      "classLevel": "Class X",
+      "marks": 91,
+      "rank": 2,
+      "status": "Passed",
+      "phone": ""
+    }
+  ],
+  "archives": [
+    {
+      "id": "arch-c1",
+      "title": "Medha Anwesha 2025 - Class I Mathematics Syllabus",
+      "type": "syllabus",
+      "year": 2025,
+      "classLevel": "Class I",
+      "content": "Primary stage guidelines: General arithmetic, basic shape matching, patterns, numbers 1-100 addition and counting tests.",
+      "downloadCount": 94
+    },
+    {
+      "id": "arch-c2",
+      "title": "Medha Anwesha 2025 - Class II Science & Env syllabus",
+      "type": "syllabus",
+      "year": 2025,
+      "classLevel": "Class II",
+      "content": "Introductory environmental concepts, local weather and flora, community awareness, and health guidelines for primary grade candidates.",
+      "downloadCount": 82
+    },
+    {
+      "id": "arch-c3",
+      "title": "Medha Anwesha 2025 - Class III Bengali Question Paper",
+      "type": "question",
+      "year": 2025,
+      "classLevel": "Class III",
+      "content": "Previous year Bengali language question paper comprising simple grammar, prose comprehension, and vocabulary spelling tests.",
+      "downloadCount": 115
+    },
+    {
+      "id": "arch-c4",
+      "title": "Medha Anwesha 2025 - Class IV Mental Logic Question Paper",
+      "type": "question",
+      "year": 2025,
+      "classLevel": "Class IV",
+      "content": "Class IV standard logical reasoning assessment, sequence completion, diagram pattern matching, and analytical puzzles.",
+      "downloadCount": 120
+    },
+    {
+      "id": "arch-1",
+      "title": "Medha Anwesha 2025 - Class V Question Paper",
+      "type": "question",
+      "year": 2025,
+      "classLevel": "Class V",
+      "content": "Syllabus, Grammar, and general questions. 80 marks written exam, 20 marks oral exam. Click download for pdf archive.",
+      "downloadCount": 145
+    },
+    {
+      "id": "arch-c6",
+      "title": "Medha Anwesha 2025 - Class VI Science Question Paper",
+      "type": "question",
+      "year": 2025,
+      "classLevel": "Class VI",
+      "content": "Introductory Physics and Biology concepts: Plants parts, animal classification, simple forces, states of matter from past exams.",
+      "downloadCount": 139
+    },
+    {
+      "id": "arch-c7",
+      "title": "Medha Anwesha 2025 - Class VII English Syllabus Guide",
+      "type": "syllabus",
+      "year": 2025,
+      "classLevel": "Class VII",
+      "content": "Guidelines for English reading comprehension, basic prose, poetry, articles/prepositions, tense structures, and synonyms/antonyms.",
+      "downloadCount": 164
+    },
+    {
+      "id": "arch-2",
+      "title": "Medha Anwesha 2025 - Class VIII Question Paper",
+      "type": "question",
+      "year": 2025,
+      "classLevel": "Class VIII",
+      "content": "Advanced Science, Mathematics, Bengali Literature sample papers from prior year examination papers.",
+      "downloadCount": 182
+    },
+    {
+      "id": "arch-c9",
+      "title": "Medha Anwesha 2025 - Class IX General Knowledge Question",
+      "type": "question",
+      "year": 2025,
+      "classLevel": "Class IX",
+      "content": "Curriculum testing over Indian Constitution history, famous scientists, Nobel Prize winners, geography, and local heritage facts.",
+      "downloadCount": 156
+    },
+    {
+      "id": "arch-c10",
+      "title": "Medha Anwesha 2025 - Class X Life Science & Mathematics",
+      "type": "question",
+      "year": 2025,
+      "classLevel": "Class X",
+      "content": "Secondary school level testing over algebra formulas, quadratic equations, cell respiration, genetics, and environment systems.",
+      "downloadCount": 204
+    },
+    {
+      "id": "arch-3",
+      "title": "Medha Anwesha 2026 - Registration Notice & Guidelines",
+      "type": "notice",
+      "year": 2026,
+      "classLevel": "All",
+      "content": "Registration for Medha Anwesha Talent Search Exam is now open! Last date to apply is October 15, 2026. Submit documents and Rs. 50 entry fee to your school headmaster.",
+      "downloadCount": 310
+    },
+    {
+      "id": "arch-4",
+      "title": "Official Exam Syllabus Class I - X (Bilingual)",
+      "type": "syllabus",
+      "year": 2026,
+      "classLevel": "All",
+      "content": "Syllabus and Breakdown of the 100-mark assessment. Formats cover MCQs, short questions, and basic puzzles.",
+      "downloadCount": 220
+    }
+  ],
+  "settings": {
+    "websiteName": "Medha Anwesha Portal (মেধা অন্বেষা)",
+    "logoText": "মেধা অন্বেষা",
+    "primaryColor": "#1a1464",
+    "accentColor": "#f5a623",
+    "themeStyle": "traditional",
+    "heroHeading": "মেধা অন্বেষা ২০২৬",
+    "heroSubtitle": "Illuminating, recognizing, and fostering local academic excellence in Bengal's villages",
+    "examDate": "Sunday, November 29, 2026",
+    "syllabusDetails": "Class I-X: Bengali Grammar & Literature (20%), Mathematics & Logical Reasoning (30%), General Science & Environment (30%), General Knowledge & Local Heritage (20%). Total MCQ Marks: 100. Duration: 2 Hours.",
+    "bgSlideshowUrls": [
+      "https://images.unsplash.com/photo-1546410531-bb4caa6b424d?q=80&w=1200",
+      "https://images.unsplash.com/photo-1577896851231-70ef18881754?q=80&w=1200",
+      "https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?q=80&w=1200"
+    ],
+    "bgVideoUrl": "https://assets.mixkit.co/videos/preview/mixkit-sunlight-through-the-leaves-of-a-tree-4357-large.mp4",
+    "useVideoBg": false,
+    "adminPasscode": "Membersmedha@1234",
+    "allowCommitteeModifications": false,
+    "footerCopyright": "© 2026 Medha Anwesha Committee",
+    "footerPhone": "+91 9876543210",
+    "footerEmail": "committee@medhaanwesha.org",
+    "footerDevName": "Sudip Khatua",
+    "footerDevEmail": "sudipkhatua808@gmail.com",
+    "footerSocial": "https://facebook.com/medhaanwesha",
+    "footerCompany": "Medha Labs Solutions",
+    "heroImageUrl": "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=1200",
+    "searchHelpText": "পরীক্ষার্থীর নাম অথবা রোল নম্বর (যেমন: MA-2026-601) দিয়ে ফলাফল অনুসন্ধান করুন।"
+  }
+}

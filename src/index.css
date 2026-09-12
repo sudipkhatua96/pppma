@@ -1,0 +1,839 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;550;700;900&family=Playfair+Display:ital,wght@0,600;0,800;1,500&family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@400;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Playfair Display", Georgia, serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Hide browser-native password reveal and clear buttons to prevent duplicate eye buttons */
+input::-ms-reveal,
+input::-ms-clear,
+input::-webkit-contacts-auto-fill-button,
+input::-webkit-credentials-auto-fill-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Elegant smooth scrollbar and custom cursor hide when hover is available */
+@media (hover: hover) {
+  html, body, a, button, select, input, [role="button"] {
+    cursor: none !important;
+  }
+}
+
+.custom-cursor-element,
+.custom-cursor-element * {
+  pointer-events: none !important;
+}
+
+
+@layer utilities {
+  .animate-fade-in {
+    opacity: 1; /* instant, zero-animation fade-in for budget devices */
+  }
+}
+
+/* Scrollbar styling - very standard, no luxury overlays */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Theme Overrides & Pure Flat UI Solid System with Elegant Glow Outlines */
+:root {
+  --bg-solid: #f8fafc;
+  --text-main: #0f172a;
+  --text-body: #1e293b;
+  --text-muted: #475569;
+}
+
+/* Day Mode / Light Theme (.theme-normal) */
+.theme-normal {
+  --bg-solid: #f8fafc;
+  --text-main: #0f172a;
+  --text-body: #1e293b;
+  --text-muted: #475569;
+}
+
+/* Night Mode / Dark Theme (.theme-dark) */
+.theme-dark {
+  --bg-solid: #0f172a; /* flat solid deep charcoal/navy */
+  --text-main: #ffffff;
+  --text-body: #cbd5e1;
+  --text-muted: #94a3b8;
+}
+
+/* Eye Comfort Theme (.theme-eye-comfort) */
+.theme-eye-comfort {
+  --bg-solid: #fdfaf2; /* flat soft cream comfort tone */
+  --text-main: #2d2219;
+  --text-body: #453323;
+  --text-muted: #6b5c4d;
+}
+
+/* Apply simple solid theme backgrounds to clear lagging webkit / canvas filters */
+.theme-normal,
+.theme-normal.min-h-screen,
+.theme-normal [class*="bg-[#faf8f5]"] {
+  background-color: var(--bg-solid) !important;
+  background-image: none !important;
+  color: var(--text-body) !important;
+}
+
+.theme-dark,
+.theme-dark.min-h-screen,
+.theme-dark [class*="bg-[#faf8f5]"] {
+  background-color: var(--bg-solid) !important;
+  background-image: none !important;
+  color: var(--text-body) !important;
+}
+
+.theme-eye-comfort,
+.theme-eye-comfort.min-h-screen,
+.theme-eye-comfort [class*="bg-[#faf8f5]"] {
+  background-color: var(--bg-solid) !important;
+  background-image: none !important;
+  color: var(--text-body) !important;
+}
+
+/* 3D Premium Accents Card Rendering: Solid backgrounds with elegant, ultra-thin neon outlines and soft glows */
+.theme-normal .bg-white,
+.theme-normal [class*="bg-white"],
+.theme-normal [class*="bg-slate-50"],
+.theme-normal [class*="bg-slate-100"],
+.theme-normal [class*="bg-indigo-50"],
+.theme-normal [class*="bg-amber-50"],
+.theme-normal .bg-slate-50\/25,
+.theme-normal .bg-slate-50\/50,
+.theme-normal #admin-media-center,
+.theme-normal #admin-appearance-panel,
+.theme-normal .results-card,
+.theme-normal .glass-card-node {
+  background: #ffffff !important;
+  border: 1px solid rgba(245, 158, 11, 0.45) !important; /* Elegant thin golden neon outline */
+  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.08) !important; /* Soft ambient gold glow */
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.theme-dark .bg-white,
+.theme-dark [class*="bg-white"],
+.theme-dark [class*="bg-slate-50"],
+.theme-dark [class*="bg-slate-100"],
+.theme-dark [class*="bg-indigo-50"],
+.theme-dark [class*="bg-amber-50"],
+.theme-dark [class*="bg-emerald-50"],
+.theme-dark [class*="bg-rose-50"],
+.theme-dark [class*="bg-gray-100"],
+.theme-dark [class*="bg-gray-50"],
+.theme-dark .bg-slate-50\/25,
+.theme-dark .bg-slate-50\/50,
+.theme-dark #admin-media-center,
+.theme-dark #admin-appearance-panel,
+.theme-dark .results-card,
+.theme-dark .glass-card-node {
+  background: #1e293b !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(6, 182, 212, 0.5) !important; /* Sleek high-energy cyan neon outline */
+  box-shadow: 0 4px 20px rgba(6, 182, 212, 0.12) !important; /* High contrast cyan glow */
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.theme-eye-comfort .bg-white,
+.theme-eye-comfort [class*="bg-white"],
+.theme-eye-comfort [class*="bg-slate-50"],
+.theme-eye-comfort [class*="bg-slate-100"],
+.theme-eye-comfort [class*="bg-indigo-50"],
+.theme-eye-comfort [class*="bg-amber-50"],
+.theme-eye-comfort [class*="bg-emerald-50"],
+.theme-eye-comfort [class*="bg-rose-50"],
+.theme-eye-comfort [class*="bg-gray-100"],
+.theme-eye-comfort [class*="bg-gray-50"],
+.theme-eye-comfort .bg-slate-50\/25,
+.theme-eye-comfort .bg-slate-50\/50,
+.theme-eye-comfort #admin-media-center,
+.theme-eye-comfort #admin-appearance-panel,
+.theme-eye-comfort .results-card,
+.theme-eye-comfort .glass-card-node {
+  background: #faf6eb !important;
+  color: #2d2219 !important;
+  border: 1px solid rgba(139, 92, 26, 0.4) !important; /* Traditional bronze outline */
+  box-shadow: 0 4px 15px rgba(139, 92, 26, 0.06) !important; /* Antique sepia glow */
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Ensure absolute, ultra-high contrast ratio for texts without muddy opacity */
+.theme-normal [class*="text-slate-"],
+.theme-normal [class*="text-gray-"],
+.theme-normal [class*="text-zinc-"],
+.theme-normal [class*="text-neutral-"] {
+  color: #0f172a !important; /* Absolute razor-sharp solid dark charcoal text */
+}
+
+.theme-normal [class*="text-indigo-"],
+.theme-normal [class*="text-blue-"] {
+  color: #1e3a8a !important; /* High contrast dark navy label */
+}
+
+/* Dark Mode Contrast Overrides */
+.theme-dark [class*="text-slate-"],
+.theme-dark [class*="text-gray-"],
+.theme-dark [class*="text-zinc-"],
+.theme-dark [class*="text-neutral-"],
+.theme-dark [class*="text-indigo-"],
+.theme-dark [class*="text-blue-"] {
+  color: #ffffff !important; /* Flat pure white for ultimate readability */
+}
+
+.theme-dark [class*="text-amber-"],
+.theme-dark [class*="text-yellow-"],
+.theme-dark [class*="text-orange-"] {
+  color: #f59e0b !important; /* Clear gold text contrast */
+}
+
+/* Eye Comfort Mode Contrast Overrides */
+.theme-eye-comfort [class*="text-slate-"],
+.theme-eye-comfort [class*="text-gray-"],
+.theme-eye-comfort [class*="text-neutral-"],
+.theme-eye-comfort [class*="text-indigo-"],
+.theme-eye-comfort [class*="text-blue-"] {
+  color: #2a1708 !important; /* Dark sepia tone text */
+}
+
+.theme-normal h1, .theme-normal h2, .theme-normal h3, .theme-normal h4, .theme-normal h5, .theme-normal h6 {
+  color: #0f172a !important;
+}
+.theme-dark h1, .theme-dark h2, .theme-dark h3, .theme-dark h4, .theme-dark h5, .theme-dark h6 {
+  color: #ffffff !important;
+}
+.theme-eye-comfort h1, .theme-eye-comfort h2, .theme-eye-comfort h3, .theme-eye-comfort h4, .theme-eye-comfort h5, .theme-eye-comfort h6 {
+  color: #2a1708 !important;
+}
+
+/* Explicit high-contrast overrides for the quick syllabus card to fix any white-on-white text issues */
+.theme-normal #quick-syllabus-card,
+.theme-eye-comfort #quick-syllabus-card {
+  background-color: #ffffff !important;
+  border-color: #f59e0b !important;
+}
+.theme-normal #quick-syllabus-card p,
+.theme-normal #quick-syllabus-card span,
+.theme-eye-comfort #quick-syllabus-card p,
+.theme-eye-comfort #quick-syllabus-card span {
+  color: #0f172a !important;
+}
+.theme-normal #quick-syllabus-card p:first-of-type,
+.theme-eye-comfort #quick-syllabus-card p:first-of-type {
+  color: #1e3a8a !important;
+}
+.theme-normal #quick-syllabus-card p:last-child,
+.theme-eye-comfort #quick-syllabus-card p:last-child {
+  color: #0f172a !important;
+}
+.theme-dark #quick-syllabus-card {
+  background-color: #1e1b4b !important;
+  border-color: #312e81 !important;
+}
+.theme-dark #quick-syllabus-card p,
+.theme-dark #quick-syllabus-card span {
+  color: #ffffff !important;
+}
+.theme-dark #quick-syllabus-card p:first-of-type {
+  color: #fbbf24 !important;
+}
+.theme-dark #quick-syllabus-card p:last-child {
+  color: #ffffff !important;
+}
+
+/* Static inputs and select boxes, no dynamic visual lag */
+.theme-normal input, .theme-normal select, .theme-normal textarea {
+  background: #ffffff !important;
+  border: 1px solid #94a3b8 !important;
+  color: #0f172a !important;
+}
+.theme-dark input, .theme-dark select, .theme-dark textarea {
+  background: #1e293b !important;
+  border: 1px solid #475569 !important;
+  color: #ffffff !important;
+}
+.theme-eye-comfort input, .theme-eye-comfort select, .theme-eye-comfort textarea {
+  background: #faf6eb !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #2a1708 !important;
+}
+
+/* Fast Table styling */
+.theme-normal th { background: #e2e8f0 !important; color: #0f172a !important; }
+.theme-dark th { background: #1e293b !important; color: #f59e0b !important; }
+.theme-eye-comfort th { background: #e6dcc3 !important; color: #453323 !important; }
+
+.theme-normal td { border-bottom: 1px solid #e2e8f0 !important; }
+.theme-dark td { border-bottom: 1px solid #334155 !important; }
+.theme-eye-comfort td { border-bottom: 1px solid #cbd5e1 !important; }
+
+#medha-presidential-banner h1,
+#medha-presidential-banner .text-amber-400,
+#medha-presidential-banner .text-amber-300 {
+  color: #fbbf24 !important;
+}
+#medha-presidential-banner p,
+#medha-presidential-banner span,
+#medha-presidential-banner .text-gray-100,
+#medha-presidential-banner .text-gray-200,
+#medha-presidential-banner .text-indigo-200 {
+  color: #ffffff !important;
+}
+#medha-presidential-banner .text-white {
+  color: #ffffff !important;
+}
+
+footer, footer p, footer span, footer a {
+  color: #ffffff !important;
+}
+footer a:hover {
+  color: #f59e0b !important;
+}
+footer .text-amber-400, footer strong {
+  color: #f59e0b !important;
+}
+footer .text-gray-400 {
+  color: #cbd5e1 !important;
+}
+
+/* High-Performance GPU-Accelerated 3D transforms & Micro Card-Lifts on Hover */
+button, select, input[type="button"], input[type="submit"], [role="button"], .clickable-tab, a.nav-link, .interactive-card-lift {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.20s ease, border-color 0.20s ease !important;
+  will-change: transform !important;
+}
+button:hover:not(:disabled), select:hover, input[type="button"]:hover, input[type="submit"]:hover, [role="button"]:hover, .clickable-tab:hover, a.nav-link:hover, .interactive-card-lift:hover {
+  transform: translate3d(0, -3px, 0) !important;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12) !important;
+}
+button:active:not(:disabled), select:active, input[type="button"]:active, input[type="submit"]:active, [role="button"]:active, .clickable-tab:active, a.nav-link:active, .interactive-card-lift:active {
+  transform: translate3d(0, -1px, 0) !important;
+}
+
+/* Conic gradient rotation keyframe animation */
+@keyframes spin-conic {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Premium hardware-accelerated Rotating Rainbow Neon Light border loop around the perimeter */
+.neon-spinning-border {
+  position: fixed !important;
+  z-index: 50 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: max-content !important;
+  height: auto !important;
+  padding: 3px !important; /* Outermost margin to reveal the spinning gradient */
+  border-radius: 9999px !important;
+  overflow: hidden !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: 0 4px 20px rgba(245, 158, 11, 0.35) !important;
+}
+
+/* Conic spinning vector layer behind the text shield container */
+.neon-spinning-border::before {
+  content: "" !important;
+  position: absolute !important;
+  top: -50% !important;
+  left: -50% !important;
+  width: 200% !important;
+  height: 200% !important;
+  background: conic-gradient(
+    from 0deg,
+    #ff007f,
+    #00f0ff,
+    #ffd700,
+    #39ff14,
+    #bd00ff,
+    #ff007f
+  ) !important;
+  animation: spin-conic 3.5s linear infinite !important;
+  will-change: transform !important;
+  z-index: 1 !important;
+  display: block !important;
+}
+
+/* Dark, fully protective solid layer behind the text child nodes to preserve maximum readability */
+.neon-spinning-border::after {
+  content: "" !important;
+  position: absolute !important;
+  inset: 2px !important; /* Leave exactly a 2px rotating border thickness visible */
+  background: #1e1b4b !important; /* solid deep space blue */
+  border-radius: 9999px !important;
+  z-index: 2 !important;
+  display: block !important;
+}
+
+.neon-spinning-border:hover::after {
+  background: #2e1a5e !important; /* subtle beautiful neon lit shift */
+}
+
+/* Force all inner elements to render as highest priority indices */
+.neon-spinning-border > div {
+  position: relative !important;
+  z-index: 10 !important;
+}
+
+/* Print view rules */
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+  #printable-certificate-area, #printable-certificate-area * {
+    visibility: visible !important;
+  }
+  #printable-certificate-area {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    border: 8px double rgb(180, 83, 9) !important;
+    background-color: white !important;
+    margin: 0 !important;
+    padding: 2.5rem !important;
+    box-shadow: none !important;
+  }
+  .print\:hidden {
+    display: none !important;
+  }
+}
+
+/* ==========================================================================
+   MANDATORY HIGH-CONTRAST ACCESSIBILITY & TEXT READABILITY OVERRIDES
+   ========================================================================== */
+
+/* 1. Global text contrast corrections inside dark/blue containers */
+.theme-normal [class*="from-indigo-950"] p,
+.theme-normal [class*="from-indigo-950"] span,
+.theme-normal [class*="from-indigo-950"] label,
+.theme-normal [class*="from-indigo-950"] div,
+.theme-normal [class*="from-indigo-900"] p,
+.theme-normal [class*="from-indigo-900"] span,
+.theme-normal [class*="from-indigo-900"] label,
+.theme-normal [class*="from-indigo-900"] div,
+.theme-eye-comfort [class*="from-indigo-950"] p,
+.theme-eye-comfort [class*="from-indigo-950"] span,
+.theme-eye-comfort [class*="from-indigo-950"] label,
+.theme-eye-comfort [class*="from-indigo-950"] div,
+.theme-eye-comfort [class*="from-indigo-900"] p,
+.theme-eye-comfort [class*="from-indigo-900"] span,
+.theme-eye-comfort [class*="from-indigo-900"] label,
+.theme-eye-comfort [class*="from-indigo-900"] div,
+.theme-dark [class*="from-indigo-950"] p,
+.theme-dark [class*="from-indigo-950"] span,
+.theme-dark [class*="from-indigo-950"] label,
+.theme-dark [class*="from-indigo-950"] div {
+  color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+/* Force pure high-contrast Gold for accents inside the verification mode blue alert panel */
+[class*="from-indigo-950"] .text-amber-400,
+[class*="from-indigo-950"] .text-amber-300,
+[class*="from-indigo-950"] .text-amber-200,
+[class*="from-indigo-900"] .text-amber-400,
+[class*="from-indigo-900"] .text-amber-300,
+[class*="from-indigo-900"] .text-amber-200 {
+  color: #fbbf24 !important;
+  font-weight: 800 !important;
+}
+
+/* 2. Overrides for light backgrounds to ensure razor-sharp Charcoal Black (#0F172A) */
+.theme-normal,
+.theme-eye-comfort {
+  --text-main: #0f172a !important;
+}
+
+/* Overwrite results list cards, toppers list cards, student info lists, and general textual blocks on light backgrounds */
+.theme-normal .results-card p,
+.theme-normal .results-card span,
+.theme-normal .results-card label,
+.theme-normal .results-card div,
+.theme-normal .results-card td,
+.theme-normal [id="individual-result-search"] .bg-white p,
+.theme-normal [id="individual-result-search"] .bg-white span,
+.theme-normal [id="individual-result-search"] .bg-white label,
+.theme-normal [id="individual-result-search"] .bg-white div,
+.theme-normal #parent-dispute-feedback-box p,
+.theme-normal #parent-dispute-feedback-box span,
+.theme-normal #parent-dispute-feedback-box label,
+.theme-normal #parent-dispute-feedback-box div,
+.theme-eye-comfort .results-card p,
+.theme-eye-comfort .results-card span,
+.theme-eye-comfort .results-card label,
+.theme-eye-comfort .results-card div,
+.theme-eye-comfort .results-card td,
+.theme-eye-comfort [id="individual-result-search"] .bg-white p,
+.theme-eye-comfort [id="individual-result-search"] .bg-white span,
+.theme-eye-comfort [id="individual-result-search"] .bg-white label,
+.theme-eye-comfort [id="individual-result-search"] .bg-white div,
+.theme-eye-comfort #parent-dispute-feedback-box p,
+.theme-eye-comfort #parent-dispute-feedback-box span,
+.theme-eye-comfort #parent-dispute-feedback-box label,
+.theme-eye-comfort #parent-dispute-feedback-box div {
+  color: #0f172a !important;
+  opacity: 1 !important;
+}
+
+/* Exclude specific visual helpers and tags from being pure black so we preserve some colored indicators */
+.theme-normal .text-emerald-800,
+.theme-eye-comfort .text-emerald-800 {
+  color: #065f46 !important;
+}
+.theme-normal .text-rose-800,
+.theme-eye-comfort .text-rose-800 {
+  color: #9f1239 !important;
+}
+.theme-normal .text-amber-600,
+.theme-eye-comfort .text-amber-600 {
+  color: #d97706 !important;
+}
+
+/* Verification Input labels & text inside 'ভেরিফিকেশন মোড' blue alert panel */
+[id="individual-result-search"] [class*="from-indigo-9"] p {
+  color: #ffffff !important;
+  opacity: 1 !important;
+  font-weight: 600 !important;
+  line-height: 1.6 !important;
+}
+
+[id="individual-result-search"] [class*="from-indigo-9"] span,
+[id="individual-result-search"] [class*="from-indigo-9"] h4 {
+  color: #f59e0b !important;
+  font-weight: 800 !important;
+}
+
+/* Dynamic Topper rows and topper lists high contrast text and spacing */
+.topper-row, .topper-card, [class*="bg-amber-50/"] {
+  line-height: 1.6 !important;
+}
+.theme-normal .topper-row p,
+.theme-normal .topper-row span,
+.theme-normal .topper-card p,
+.theme-normal .topper-card span,
+.theme-eye-comfort .topper-row p,
+.theme-eye-comfort .topper-row span,
+.theme-eye-comfort .topper-card p,
+.theme-eye-comfort .topper-card span {
+  color: #0f172a !important;
+  font-weight: 700 !important;
+}
+
+/* Ensure no text ever fades into background or matches background color */
+.text-gray-500, .text-slate-500, .text-gray-400, .text-slate-400 {
+  color: #0f172a !important;
+}
+.theme-dark .text-gray-500, 
+.theme-dark .text-slate-500, 
+.theme-dark .text-gray-400, 
+.theme-dark .text-slate-400,
+.theme-dark .text-gray-300,
+.theme-dark .text-slate-300 {
+  color: #ffffff !important;
+}
+.theme-eye-comfort .text-gray-500, 
+.theme-eye-comfort .text-slate-500, 
+.theme-eye-comfort .text-gray-400, 
+.theme-eye-comfort .text-slate-400,
+.theme-eye-comfort .text-gray-300,
+.theme-eye-comfort .text-slate-300 {
+  color: #2a1708 !important;
+}
+
+/* ==========================================================================
+   NESTED NEUTRAL BLOCKS & COMFORT ADJUSTMENTS
+   ========================================================================== */
+.theme-dark .bg-gray-50,
+.theme-dark [class*="bg-gray-50"] {
+  background-color: #0f172a !important; /* Even darker blue/indigo background for nested blocks in dark mode */
+}
+.theme-dark .bg-gray-50 p,
+.theme-dark .bg-gray-50 span,
+.theme-dark [class*="bg-gray-50"] p,
+.theme-dark [class*="bg-gray-50"] span {
+  color: #ffffff !important;
+}
+
+.theme-eye-comfort .bg-gray-50,
+.theme-eye-comfort [class*="bg-gray-50"] {
+  background-color: #f5eedc !important; /* Soft sand comfort-tone for nested blocks */
+}
+.theme-eye-comfort .bg-gray-50 p,
+.theme-eye-comfort .bg-gray-50 span,
+.theme-eye-comfort [class*="bg-gray-50"] p,
+.theme-eye-comfort [class*="bg-gray-50"] span {
+  color: #2d2219 !important;
+}
+
+/* ==========================================================================
+   FOOTER TEXT BRIGHTNESS & READABILITY SAFEGUARDS (SPECIFIC HIGHER SPECIFICITY OVERRIDES)
+   ========================================================================== */
+footer,
+footer *,
+.theme-normal footer,
+.theme-normal footer *,
+.theme-eye-comfort footer,
+.theme-eye-comfort footer * {
+  color: #ffffff !important;
+}
+
+footer a,
+footer a *,
+.theme-normal footer a,
+.theme-normal footer a *,
+.theme-eye-comfort footer a,
+.theme-eye-comfort footer a * {
+  color: #fbbf24 !important; /* Elegant gold links in footer */
+}
+
+footer a:hover,
+footer a:hover *,
+.theme-normal footer a:hover,
+.theme-normal footer a:hover *,
+.theme-eye-comfort footer a:hover,
+.theme-eye-comfort footer a:hover * {
+  color: #ffffff !important;
+  text-decoration: underline !important;
+}
+
+footer .text-amber-500,
+footer .text-amber-400,
+footer .text-amber-300,
+footer strong,
+footer span[class*="text-amber-"],
+footer svg[class*="text-amber-"],
+.theme-normal footer .text-amber-500,
+.theme-normal footer .text-amber-400,
+.theme-normal footer .text-amber-300,
+.theme-normal footer strong,
+.theme-normal footer span[class*="text-amber-"],
+.theme-normal footer svg[class*="text-amber-"],
+.theme-eye-comfort footer .text-amber-500,
+.theme-eye-comfort footer .text-amber-400,
+.theme-eye-comfort footer .text-amber-300,
+.theme-eye-comfort footer strong,
+.theme-eye-comfort footer span[class*="text-amber-"],
+.theme-eye-comfort footer svg[class*="text-amber-"] {
+  color: #fbbf24 !important; /* Crisp high contrast saffron gold for primary items */
+}
+
+footer .text-gray-500,
+footer .text-gray-400,
+footer .text-gray-300,
+footer .text-gray-200,
+footer .text-slate-400,
+footer p[class*="text-gray-"],
+footer span[class*="text-gray-"],
+footer p[class*="text-slate-"],
+footer span[class*="text-slate-"],
+.theme-normal footer .text-gray-500,
+.theme-normal footer .text-gray-400,
+.theme-normal footer .text-gray-300,
+.theme-normal footer .text-gray-200,
+.theme-normal footer .text-slate-400,
+.theme-normal footer p[class*="text-gray-"],
+.theme-normal footer span[class*="text-gray-"],
+.theme-normal footer p[class*="text-slate-"],
+.theme-normal footer span[class*="text-slate-"],
+.theme-eye-comfort footer .text-gray-500,
+.theme-eye-comfort footer .text-gray-400,
+.theme-eye-comfort footer .text-gray-300,
+.theme-eye-comfort footer .text-gray-200,
+.theme-eye-comfort footer .text-slate-400,
+.theme-eye-comfort footer p[class*="text-gray-"],
+.theme-eye-comfort footer span[class*="text-gray-"],
+.theme-eye-comfort footer p[class*="text-slate-"],
+.theme-eye-comfort footer span[class*="text-slate-"] {
+  color: #cbd5e1 !important; /* Soft, highly legible silver for description texts */
+}
+
+/* ==========================================================================
+   DECORATIVE WATERMARKS BACKGROUND OVERRIDES (ANTI-OVERLAP RULES)
+   ========================================================================== */
+.decorative-watermark,
+div.decorative-watermark,
+[class*="from-indigo"] div.decorative-watermark,
+[class*="from-indigo"] .decorative-watermark,
+[class*="from-indigo"] .decorative-watermark svg,
+[class*="from-indigo"] .decorative-watermark * {
+  opacity: 0.04 !important;
+  color: rgba(255, 255, 255, 0.4) !important;
+  z-index: 0 !important;
+}
+
+/* ==========================================================================
+   HIGH-SPECIFICITY ACCESSIBILITY & CONTRAST READABILITY FOR DARK PANEL CONTAINERS
+   ========================================================================== */
+
+/* Specifically target headings, paragraphs, and standard spans/labels inside dark containers, 
+   excluding button elements or items with white/amber bg classes */
+.theme-normal [class*="bg-indigo-950"] h1,
+.theme-normal [class*="bg-indigo-950"] h2,
+.theme-normal [class*="bg-indigo-950"] h3,
+.theme-normal [class*="bg-indigo-950"] h4,
+.theme-normal [class*="bg-indigo-950"] h5,
+.theme-normal [class*="bg-indigo-950"] h6,
+.theme-normal [class*="bg-indigo-950"] p,
+.theme-normal [class*="bg-indigo-950"] span:not([class*="bg-"]):not(button):not(.scale-150):not(.scale-75),
+.theme-normal [class*="bg-indigo-950"] label:not([class*="bg-"]):not(button),
+.theme-normal [class*="bg-slate-900"] h1,
+.theme-normal [class*="bg-slate-900"] h2,
+.theme-normal [class*="bg-slate-900"] h3,
+.theme-normal [class*="bg-slate-900"] h4,
+.theme-normal [class*="bg-slate-900"] h5,
+.theme-normal [class*="bg-slate-900"] h6,
+.theme-normal [class*="bg-slate-900"] p,
+.theme-normal [class*="bg-slate-900"] span:not([class*="bg-"]):not(button):not(.scale-150):not(.scale-75),
+.theme-normal [class*="bg-slate-900"] label:not([class*="bg-"]):not(button),
+.theme-normal [class*="from-indigo-950"] h1,
+.theme-normal [class*="from-indigo-950"] h2,
+.theme-normal [class*="from-indigo-950"] h3,
+.theme-normal [class*="from-indigo-950"] h4,
+.theme-normal [class*="from-indigo-950"] h5,
+.theme-normal [class*="from-indigo-950"] h6,
+.theme-normal [class*="from-indigo-950"] p,
+.theme-normal [class*="from-indigo-950"] span:not([class*="bg-"]):not(button):not(.scale-150):not(.scale-75),
+.theme-normal [class*="from-indigo-950"] label:not([class*="bg-"]):not(button),
+.theme-eye-comfort [class*="bg-indigo-950"] h1,
+.theme-eye-comfort [class*="bg-indigo-950"] h2,
+.theme-eye-comfort [class*="bg-indigo-950"] h3,
+.theme-eye-comfort [class*="bg-indigo-950"] h4,
+.theme-eye-comfort [class*="bg-indigo-950"] h5,
+.theme-eye-comfort [class*="bg-indigo-950"] h6,
+.theme-eye-comfort [class*="bg-indigo-950"] p,
+.theme-eye-comfort [class*="bg-indigo-950"] span:not([class*="bg-"]):not(button):not(.scale-150):not(.scale-75),
+.theme-eye-comfort [class*="bg-indigo-950"] label:not([class*="bg-"]):not(button),
+.theme-eye-comfort [class*="bg-slate-900"] h1,
+.theme-eye-comfort [class*="bg-slate-900"] h2,
+.theme-eye-comfort [class*="bg-slate-900"] h3,
+.theme-eye-comfort [class*="bg-slate-900"] h4,
+.theme-eye-comfort [class*="bg-slate-900"] h5,
+.theme-eye-comfort [class*="bg-slate-900"] h6,
+.theme-eye-comfort [class*="bg-slate-900"] p,
+.theme-eye-comfort [class*="bg-slate-900"] span:not([class*="bg-"]):not(button):not(.scale-150):not(.scale-75),
+.theme-eye-comfort [class*="bg-slate-900"] label:not([class*="bg-"]):not(button) {
+  color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+/* Retain high-contrast gold/amber accents within those dark containers */
+.theme-normal [class*="bg-indigo-950"] .text-amber-400,
+.theme-normal [class*="bg-indigo-950"] .text-amber-300,
+.theme-normal [class*="bg-indigo-950"] .text-amber-500,
+.theme-normal [class*="bg-slate-900"] .text-amber-400,
+.theme-normal [class*="bg-slate-900"] .text-amber-300,
+.theme-normal [class*="bg-slate-900"] .text-amber-500,
+.theme-normal [class*="bg-indigo-900"] .text-amber-400,
+.theme-normal [class*="bg-indigo-900"] .text-amber-500,
+.theme-eye-comfort [class*="bg-indigo-950"] .text-amber-400,
+.theme-eye-comfort [class*="bg-indigo-950"] .text-amber-500,
+.theme-eye-comfort [class*="bg-slate-900"] .text-amber-400,
+.theme-eye-comfort [class*="bg-slate-900"] .text-amber-500 {
+  color: #fbbf24 !important;
+}
+
+/* ==========================================================================
+   DEREGISTERING CONFLICTS AND ENSURING READABILITY FOR CUSTOM ELEMENTS
+   ========================================================================== */
+
+/* 1. Visual Analytics Bento Box theme-wise overrides */
+.theme-normal #visual-analytics-bento {
+  background: linear-gradient(to bottom right, #fbfbfe, #f5f6fa) !important;
+  border-color: #cbd5e1 !important;
+}
+.theme-normal #visual-analytics-bento p:not([class*="text-amber-"]):not([class*="text-rose-"]):not([class*="text-emerald-"]),
+.theme-normal #visual-analytics-bento span:not([class*="text-amber-"]):not([class*="text-rose-"]):not([class*="text-emerald-"]),
+.theme-normal #visual-analytics-bento label:not([class*="text-amber-"]):not([class*="text-rose-"]):not([class*="text-emerald-"]),
+.theme-normal #visual-analytics-bento div:not([class*="text-amber-"]):not([class*="text-rose-"]):not([class*="text-emerald-"]):not([class*="bg-"]):not(button),
+.theme-normal #visual-analytics-bento h4:not([class*="text-amber-"]):not([class*="text-rose-"]):not([class*="text-emerald-"]) {
+  color: #0f172a !important;
+}
+
+.theme-dark #visual-analytics-bento {
+  background: linear-gradient(to bottom right, #0b1329, #111827) !important;
+  border: 1px solid rgba(6, 182, 212, 0.4) !important;
+  box-shadow: 0 4px 20px rgba(6, 182, 212, 0.08) !important;
+}
+.theme-dark #visual-analytics-bento p,
+.theme-dark #visual-analytics-bento span:not([class*="bg-"]):not(button),
+.theme-dark #visual-analytics-bento label,
+.theme-dark #visual-analytics-bento div:not([class*="bg-"]):not(button),
+.theme-dark #visual-analytics-bento h4 {
+  color: #ffffff !important;
+}
+.theme-dark #visual-analytics-bento .text-amber-700,
+.theme-dark #visual-analytics-bento .text-amber-800 {
+  color: #f59e0b !important;
+}
+
+.theme-eye-comfort #visual-analytics-bento {
+  background: linear-gradient(to bottom right, #fdfbf7, #faf6eb) !important;
+  border: 1px solid rgba(139, 92, 26, 0.3) !important;
+  box-shadow: 0 4px 15px rgba(139, 92, 26, 0.04) !important;
+}
+.theme-eye-comfort #visual-analytics-bento p:not([class*="text-amber-"]):not([class*="text-rose-"]):not([class*="text-emerald-"]),
+.theme-eye-comfort #visual-analytics-bento span:not([class*="text-amber-"]):not([class*="text-rose-"]):not([class*="text-emerald-"]),
+.theme-eye-comfort #visual-analytics-bento label:not([class*="text-amber-"]):not([class*="text-rose-"]):not([class*="text-emerald-"]),
+.theme-eye-comfort #visual-analytics-bento div:not([class*="text-amber-"]):not([class*="text-rose-"]):not([class*="text-emerald-"]):not([class*="bg-"]):not(button),
+.theme-eye-comfort #visual-analytics-bento h4:not([class*="text-amber-"]):not([class*="text-rose-"]):not([class*="text-emerald-"]) {
+  color: #2a1708 !important;
+}
+
+/* 2. Unselected / Inactive button tab text dimmed contrasts */
+.theme-dark button.text-gray-500,
+.theme-dark button [class*="text-gray-500"],
+.theme-dark [class*="text-gray-500"] button {
+  color: #94a3b8 !important;
+}
+.theme-dark button.text-gray-500:hover,
+.theme-dark button [class*="text-gray-500"]:hover {
+  color: #ffffff !important;
+}
+
+.theme-eye-comfort button.text-gray-500,
+.theme-eye-comfort button [class*="text-gray-500"],
+.theme-eye-comfort [class*="text-gray-500"] button {
+  color: #7c6e64 !important;
+}
+.theme-eye-comfort button.text-gray-500:hover,
+.theme-eye-comfort button [class*="text-gray-500"]:hover {
+  color: #2a1708 !important;
+}
+
+

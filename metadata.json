@@ -1,0 +1,6 @@
+{
+  "name": "Medha Anwesha",
+  "description": "Premium School & Village Talent Search Exam Portal for Medha Anwesha (মেধা অন্বেষা) with Student Result Portal, Admin Dashboard, Multilingual AI Chatbot, and Past Archives.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
