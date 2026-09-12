@@ -331,23 +331,23 @@ export default function AdminDashboard({ settings, onRefreshSettings, showToast 
         setUserFullName(fullName || "Super Administrator");
         setLoginError("");
         fetchAllDevData("offline-token");
-        triggerToast("অফলাইন ডেমো মোডে সুপার-এডমিন লগইন সফল!", "success");
+        triggerToast("সুপার-এডমিন লগইন সফল!", "success");
       } else if (cleanPass === "Committee@1" || cleanPass === "comm1") {
         setIsAuthenticated(true);
         setUserRole("subadmin");
         setUserFullName(fullName || "Committee Member");
         setLoginError("");
         fetchAllDevData("offline-token");
-        triggerToast("অফলাইন ডেমো মোডে কমিটি সদস্য লগইন সফল!", "success");
+        triggerToast("কমিটি সদস্য লগইন সফল!", "success");
       } else if (cleanPass === "Coord@1" || cleanPass === "coord1") {
         setIsAuthenticated(true);
         setUserRole("member");
         setUserFullName(fullName || "Coordinator");
         setLoginError("");
         fetchAllDevData("offline-token");
-        triggerToast("অফলাইন ডেমো মোডে কোঅর্ডিনেটর লগইন সফল!", "success");
+        triggerToast("কোঅর্ডিনেটর লগইন সফল!", "success");
       } else {
-        setLoginError("পাসকোডটি সঠিক নয়। ডেমো পাসকোড: Admin@112345 (Invalid Passcode. Demo: Admin@112345)");
+        setLoginError("পাসকোডটি সঠিক নয়। অনুগ্রহ করে পুনরায় চেষ্টা করুন (Invalid Passcode. Please try again).");
       }
     }
   };
@@ -1001,35 +1001,6 @@ export default function AdminDashboard({ settings, onRefreshSettings, showToast 
                   title={showPasscode ? "Hide Passcode" : "Show Passcode"}
                 >
                   {showPasscode ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
-              </div>
-            </div>
-
-            {/* Quick Demo Fill Buttons */}
-            <div className="p-3 bg-amber-50 border border-amber-200/80 rounded-xl text-left space-y-1.5">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-extrabold text-amber-800 uppercase tracking-wide">💡 Demo Passcodes (টেস্টিং)</span>
-              </div>
-              <div className="flex flex-wrap gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setFullName("Super Administrator");
-                    setPasscode("Admin@112345");
-                  }}
-                  className="px-2.5 py-1 bg-amber-200/70 hover:bg-amber-300 text-indigo-950 font-bold text-[10px] rounded-lg transition-all cursor-pointer shadow-sm"
-                >
-                  🔑 Superadmin (Admin@112345)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setFullName("Committee Member");
-                    setPasscode("Committee@1");
-                  }}
-                  className="px-2.5 py-1 bg-indigo-100 hover:bg-indigo-200 text-indigo-950 font-bold text-[10px] rounded-lg transition-all cursor-pointer shadow-sm"
-                >
-                  👥 Committee (Committee@1)
                 </button>
               </div>
             </div>
