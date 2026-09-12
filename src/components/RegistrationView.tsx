@@ -23,14 +23,49 @@ export default function RegistrationView() {
 
   const classes = ["Class I", "Class II", "Class III", "Class IV", "Class V", "Class VI", "Class VII", "Class VIII", "Class IX", "Class X"];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!candidateName.trim() || !guardianName.trim() || !schoolName.trim() || !phone.trim()) {
       alert("অনুগ্রহ করে সব প্রয়োজনীয় তথ্য সঠিকভাবে পূরণ করুন।");
       return;
     }
 
-    const generatedId = `MEDHA-2026-REG-${Math.floor(1000 + Math.random() * 9000)}`;
+    const payload = {
+      studentName: candidateName.trim(),
+      guardianName: guardianName.trim(),
+      classLevel,
+      schoolName: schoolName.trim(),
+      phone: phone.trim(),
+      dob,
+      gender,
+      village: address,
+      postOffice: address,
+      district: "Hooghly"
+    };
+
+    let generatedId = `MEDHA-2026-REG-${Math.floor(1000 + Math.random() * 9000)}`;
+
+    try {
+      const res = await fetch("/api/registrations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.application) {
+          generatedId = data.application.applicationId || generatedId;
+        }
+      }
+    } catch (err) {
+      console.warn("Could not post registration to server API, using local storage.", err);
+    }
+
+    // Save locally
+    const existing = JSON.parse(localStorage.getItem("medha_local_registrations") || "[]");
+    existing.unshift({ ...payload, applicationId: generatedId, appliedAt: new Date().toISOString() });
+    localStorage.setItem("medha_local_registrations", JSON.stringify(existing));
+
     setAppId(generatedId);
     setSubmittedDate(new Date().toLocaleDateString('bn-BD', { year: 'numeric', month: 'long', day: 'numeric' }));
     setSubmitted(true);

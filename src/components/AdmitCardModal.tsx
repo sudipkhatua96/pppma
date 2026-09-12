@@ -18,11 +18,26 @@ export default function AdmitCardModal({ isOpen, onClose }: AdmitCardModalProps)
 
   const printAreaRef = useRef<HTMLDivElement>(null);
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!searchQuery.trim()) return;
 
     const query = searchQuery.trim().toUpperCase();
+
+    // 1. Check remote API
+    try {
+      const res = await fetch(`/api/admit-cards?q=${encodeURIComponent(query)}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && Array.isArray(data.admitCards) && data.admitCards.length > 0) {
+          setAdmitCard(data.admitCards[0]);
+          setSearched(true);
+          return;
+        }
+      }
+    } catch (err) {
+      console.warn("Could not fetch remote admit cards, using local search fallback.", err);
+    }
     
     // Check specific admit card records
     if (DEFAULT_ADMIT_CARDS[query]) {

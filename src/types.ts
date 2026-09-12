@@ -102,3 +102,68 @@ export interface UserAuth {
   name: string;
   role: 'superadmin' | 'committee' | 'data-entry';
 }
+
+export interface MockQuestion {
+  id: string;
+  classLevel: string; // e.g. "Class I" to "Class X"
+  subject: "Bengali" | "Mathematics" | "Science" | "General Knowledge";
+  questionBn: string;
+  options: [string, string, string, string];
+  correctIndex: number; // 0, 1, 2, 3
+  explanationBn: string;
+}
+
+export interface HallOfFameMember {
+  id: string;
+  name: string;
+  year: number;
+  classLevel: string;
+  rank: 1 | 2 | 3;
+  score: number;
+  maxScore: number;
+  school: string;
+  trophyType: "gold" | "silver" | "bronze";
+  quoteBn: string;
+  achievementBadge: string;
+}
+
+export interface AdmitCardRecord {
+  rollNo: string;
+  name: string;
+  guardianName: string;
+  classLevel: string;
+  school: string;
+  centerName: string;
+  centerAddress: string;
+  roomNo: string;
+  seatNo: string;
+  examDate: string;
+  reportingTime: string;
+  examTime: string;
+}
+
+export interface CandidateRegistration {
+  id: string;
+  applicationId: string;
+  studentName: string;
+  guardianName: string;
+  phone: string;
+  email?: string;
+  dob?: string;
+  gender: string;
+  schoolName: string;
+  classLevel: string;
+  village: string;
+  postOffice: string;
+  district: string;
+  status: "pending" | "approved" | "rejected";
+  appliedAt: string;
+  assignedRollNo?: string;
+}
+
+export interface ChatbotSettings {
+  welcomeMessageBn?: string;
+  systemPrompt?: string;
+  geminiApiKey?: string;
+  faqList?: { q: string; a: string }[];
+}

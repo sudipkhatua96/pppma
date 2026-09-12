@@ -1,8 +1,8 @@
 import { useState, useEffect, Component, ReactNode, ErrorInfo } from "react";
 import * as XLSX from "xlsx";
-import { Lock, Save, Trash2, Plus, LogOut, CheckCircle, RefreshCw, FileSpreadsheet, Eye, EyeOff, HelpCircle, Edit, Key, Unlock, Star, ShieldAlert, Upload, BarChart3, TrendingUp, Award, FileDown, Image, Activity } from "lucide-react";
-import { StudentResult, PortalSettings, NoticeOrArchive } from "../types";
-import { DEFAULT_RESULTS, DEFAULT_ARCHIVES } from "../mockData";
+import { Lock, Save, Trash2, Plus, LogOut, CheckCircle, RefreshCw, FileSpreadsheet, Eye, EyeOff, HelpCircle, Edit, Key, Unlock, Star, ShieldAlert, Upload, BarChart3, TrendingUp, Award, FileDown, Image, Activity, Ticket, Trophy, UserPlus, Bot, Sparkles, BookOpen, Layers, CheckSquare, Search, Filter, Printer, Copy, Check, MessageSquare, Calendar, MapPin, Building, UserCheck } from "lucide-react";
+import { StudentResult, PortalSettings, NoticeOrArchive, MockQuestion, AdmitCardRecord, HallOfFameMember, CandidateRegistration, ChatbotSettings } from "../types";
+import { DEFAULT_RESULTS, DEFAULT_ARCHIVES, DEFAULT_MOCK_QUESTIONS, DEFAULT_HALL_OF_FAME, DEFAULT_ADMIT_CARDS } from "../mockData";
 
 class DashboardErrorBoundary extends Component<
   { children: ReactNode }, 
@@ -105,6 +105,38 @@ export default function AdminDashboard({ settings, onRefreshSettings, showToast 
   const [activityLogs, setActivityLogs] = useState<any[]>([]);
   const [supportTickets, setSupportTickets] = useState<any[]>([]);
 
+  // 📝 Mock Test Management States
+  const [mockQuestions, setMockQuestions] = useState<MockQuestion[]>([]);
+  const [editMockQuestion, setEditMockQuestion] = useState<Partial<MockQuestion> | null>(null);
+  const [mockClassFilter, setMockClassFilter] = useState("All");
+  const [mockSubjectFilter, setMockSubjectFilter] = useState("All");
+
+  // 🎟️ Admit Cards Management States
+  const [admitCards, setAdmitCards] = useState<AdmitCardRecord[]>([]);
+  const [editAdmitCard, setEditAdmitCard] = useState<Partial<AdmitCardRecord> | null>(null);
+  const [admitCardSearch, setAdmitCardSearch] = useState("");
+
+  // 🏆 Hall of Fame Management States
+  const [hallOfFame, setHallOfFame] = useState<HallOfFameMember[]>([]);
+  const [editHallOfFame, setEditHallOfFame] = useState<Partial<HallOfFameMember> | null>(null);
+
+  // ✍️ Pre-Registrations Review States
+  const [registrations, setRegistrations] = useState<CandidateRegistration[]>([]);
+  const [regSearch, setRegSearch] = useState("");
+  const [regStatusFilter, setRegStatusFilter] = useState<"all" | "pending" | "approved" | "rejected">("all");
+
+  // 🤖 AI Chatbot Settings States
+  const [chatbotConfig, setChatbotConfig] = useState<ChatbotSettings>({
+    welcomeMessageBn: "নমস্কার! মেধা অন্বেষা ২০২৬ পোর্টালে আপনাকে স্বাগতম। আমি আপনার ভার্চুয়াল সহকারী।",
+    systemPrompt: "You are the helpful, encouraging AI assistant for Medha Anwesha 2026 talent search exam.",
+    geminiApiKey: "",
+    faqList: [
+      { q: "পরীক্ষার তারিখ কখন?", a: "আগামী রবিবার, ২৯শে নভেম্বর, ২০২৬ সকাল ১১:০০ টা থেকে দুপুর ১:০০ টা পর্যন্ত।" },
+      { q: "এডমিট কার্ড কীভাবে পাব?", a: "ওয়েবসাইটের 'এডমিট কার্ড' বাটনে ক্লিক করে রোল নম্বর বা নাম লিখে ডাউনলোড করুন।" },
+      { q: "মক টেস্ট কীভাবে দেব?", a: "ওয়েবসাইটের 'মক টেস্ট' ট্যাবে গিয়ে যেকোনো ক্লাসের ১০ নম্বরের MCQ অনুশীলন করুন।" }
+    ]
+  });
+
   // Settings customizer states
   const [localSettings, setLocalSettings] = useState<PortalSettings | null>(null);
   const [saveStatus, setSaveStatus] = useState("");
@@ -113,7 +145,9 @@ export default function AdminDashboard({ settings, onRefreshSettings, showToast 
   const [releaseStatus, setReleaseStatus] = useState<{ success: boolean | null; message: string }>({ success: null, message: "" });
   const [releaseLoading, setReleaseLoading] = useState(false);
 
-  const [activeSubTab, setActiveSubTab] = useState<"appearance" | "results" | "archives" | "feedbacks" | "activity_logs" | "media_center" | "download_center" | "support_tickets" | "visitor_logs">("results");
+  const [activeSubTab, setActiveSubTab] = useState<
+    "appearance" | "results" | "mock_tests" | "admit_cards" | "hall_of_fame" | "registrations" | "archives" | "ai_chatbot" | "feedbacks" | "activity_logs" | "media_center" | "download_center" | "support_tickets" | "visitor_logs"
+  >("results");
   
   // Visitor search tracking states
   const [visitorLogs, setVisitorLogs] = useState<any[]>([]);
@@ -214,12 +248,69 @@ export default function AdminDashboard({ settings, onRefreshSettings, showToast 
       } else {
         setSupportTickets([]);
       }
+
+      // 📝 Fetch Mock Questions
+      const mqRes = await fetch("/api/mock-questions");
+      if (mqRes.ok) {
+        const mqData = await mqRes.json();
+        setMockQuestions(mqData.success && Array.isArray(mqData.questions) ? mqData.questions : DEFAULT_MOCK_QUESTIONS);
+      } else {
+        const savedMq = localStorage.getItem("medha_mock_questions");
+        setMockQuestions(savedMq ? JSON.parse(savedMq) : DEFAULT_MOCK_QUESTIONS);
+      }
+
+      // 🎟️ Fetch Admit Cards
+      const acRes = await fetch("/api/admit-cards");
+      if (acRes.ok) {
+        const acData = await acRes.json();
+        setAdmitCards(acData.success && Array.isArray(acData.admitCards) ? acData.admitCards : Object.values(DEFAULT_ADMIT_CARDS));
+      } else {
+        const savedAc = localStorage.getItem("medha_admit_cards");
+        setAdmitCards(savedAc ? JSON.parse(savedAc) : Object.values(DEFAULT_ADMIT_CARDS));
+      }
+
+      // 🏆 Fetch Hall of Fame
+      const hofRes = await fetch("/api/hall-of-fame");
+      if (hofRes.ok) {
+        const hofData = await hofRes.json();
+        setHallOfFame(hofData.success && Array.isArray(hofData.toppers) ? hofData.toppers : DEFAULT_HALL_OF_FAME);
+      } else {
+        const savedHof = localStorage.getItem("medha_hall_of_fame");
+        setHallOfFame(savedHof ? JSON.parse(savedHof) : DEFAULT_HALL_OF_FAME);
+      }
+
+      // ✍️ Fetch Registrations
+      const regRes = await fetch("/api/admin/registrations", { headers });
+      if (regRes.ok) {
+        const regData = await regRes.json();
+        setRegistrations(regData.success && Array.isArray(regData.registrations) ? regData.registrations : []);
+      } else {
+        const savedReg = localStorage.getItem("medha_local_registrations");
+        setRegistrations(savedReg ? JSON.parse(savedReg) : []);
+      }
+
+      // 🤖 Fetch Chatbot Settings
+      const cbRes = await fetch("/api/chatbot-settings");
+      if (cbRes.ok) {
+        const cbData = await cbRes.json();
+        if (cbData.success && cbData.settings) {
+          setChatbotConfig(cbData.settings);
+        }
+      }
     } catch (err) {
       console.warn("Using offline fallback data in Admin Dashboard");
       const savedResults = localStorage.getItem("medha_custom_results");
       setResults(savedResults ? JSON.parse(savedResults) : DEFAULT_RESULTS);
       const savedArchives = localStorage.getItem("medha_custom_archives");
       setArchives(savedArchives ? JSON.parse(savedArchives) : DEFAULT_ARCHIVES);
+      const savedMq = localStorage.getItem("medha_mock_questions");
+      setMockQuestions(savedMq ? JSON.parse(savedMq) : DEFAULT_MOCK_QUESTIONS);
+      const savedAc = localStorage.getItem("medha_admit_cards");
+      setAdmitCards(savedAc ? JSON.parse(savedAc) : Object.values(DEFAULT_ADMIT_CARDS));
+      const savedHof = localStorage.getItem("medha_hall_of_fame");
+      setHallOfFame(savedHof ? JSON.parse(savedHof) : DEFAULT_HALL_OF_FAME);
+      const savedReg = localStorage.getItem("medha_local_registrations");
+      setRegistrations(savedReg ? JSON.parse(savedReg) : []);
     }
   };
 
@@ -960,6 +1051,268 @@ export default function AdminDashboard({ settings, onRefreshSettings, showToast 
     }
   };
 
+  // ------------------------------------
+  // 1. MOCK TEST QUESTION BANK HANDLERS
+  // ------------------------------------
+  const handleSaveMockQuestion = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editMockQuestion || !editMockQuestion.questionBn) return;
+
+    try {
+      const isEdit = !!editMockQuestion.id;
+      const url = isEdit ? `/api/admin/mock-questions/${editMockQuestion.id}` : "/api/admin/mock-questions";
+      const method = isEdit ? "PUT" : "POST";
+
+      const res = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+          "x-admin-passcode": passcode
+        },
+        body: JSON.stringify(editMockQuestion)
+      });
+      const data = await res.json();
+      if (data.success) {
+        setMockQuestions(data.questions);
+        setEditMockQuestion(null);
+        triggerToast(data.message || "মক টেস্ট প্রশ্ন সংরক্ষিত হয়েছে।", "success");
+      } else {
+        triggerToast(data.message || "সংরক্ষণ করা যায়নি।", "error");
+      }
+    } catch (err) {
+      // Local fallback
+      const updated = editMockQuestion.id
+        ? mockQuestions.map(q => q.id === editMockQuestion.id ? { ...q, ...editMockQuestion } as MockQuestion : q)
+        : [{ ...editMockQuestion, id: "mq-" + Date.now() } as MockQuestion, ...mockQuestions];
+      setMockQuestions(updated);
+      localStorage.setItem("medha_mock_questions", JSON.stringify(updated));
+      setEditMockQuestion(null);
+      triggerToast("মক টেস্ট প্রশ্ন সংরক্ষিত হয়েছে (Local)।", "success");
+    }
+  };
+
+  const handleDeleteMockQuestion = async (id: string) => {
+    if (!confirm("আপনি কি নিশ্চিত যে এই প্রশ্নটি মুছে ফেলতে চান?")) return;
+    try {
+      const res = await fetch(`/api/admin/mock-questions/${id}`, {
+        method: "DELETE",
+        headers: { "x-admin-passcode": passcode }
+      });
+      const data = await res.json();
+      if (data.success) {
+        setMockQuestions(data.questions);
+        triggerToast("প্রশ্ন মুছে ফেলা হয়েছে।", "success");
+      }
+    } catch (err) {
+      const filtered = mockQuestions.filter(q => q.id !== id);
+      setMockQuestions(filtered);
+      localStorage.setItem("medha_mock_questions", JSON.stringify(filtered));
+      triggerToast("প্রশ্ন মুছে ফেলা হয়েছে (Local)।", "success");
+    }
+  };
+
+  // ------------------------------------
+  // 2. ADMIT CARDS CRUD HANDLERS
+  // ------------------------------------
+  const handleSaveAdmitCard = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editAdmitCard || !editAdmitCard.rollNo || !editAdmitCard.name) return;
+
+    try {
+      const res = await fetch("/api/admin/admit-cards", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-admin-passcode": passcode
+        },
+        body: JSON.stringify(editAdmitCard)
+      });
+      const data = await res.json();
+      if (data.success) {
+        setAdmitCards(data.admitCards);
+        setEditAdmitCard(null);
+        triggerToast("এডমিট কার্ড সফলভাবে সংরক্ষিত হয়েছে।", "success");
+      }
+    } catch (err) {
+      const updated = admitCards.some(c => c.rollNo === editAdmitCard.rollNo)
+        ? admitCards.map(c => c.rollNo === editAdmitCard.rollNo ? { ...c, ...editAdmitCard } as AdmitCardRecord : c)
+        : [editAdmitCard as AdmitCardRecord, ...admitCards];
+      setAdmitCards(updated);
+      localStorage.setItem("medha_admit_cards", JSON.stringify(updated));
+      setEditAdmitCard(null);
+      triggerToast("এডমিট কার্ড সংরক্ষিত হয়েছে (Local)।", "success");
+    }
+  };
+
+  const handleDeleteAdmitCard = async (rollNo: string, name: string) => {
+    if (!confirm(`আপনি কি "${name}" (${rollNo})-এর এডমিট কার্ড মুছে ফেলতে চান?`)) return;
+    try {
+      const res = await fetch(`/api/admin/admit-cards/${rollNo}`, {
+        method: "DELETE",
+        headers: { "x-admin-passcode": passcode }
+      });
+      const data = await res.json();
+      if (data.success) {
+        setAdmitCards(data.admitCards);
+        triggerToast("এডমিট কার্ড মুছে ফেলা হয়েছে।", "success");
+      }
+    } catch (err) {
+      const filtered = admitCards.filter(c => c.rollNo !== rollNo);
+      setAdmitCards(filtered);
+      localStorage.setItem("medha_admit_cards", JSON.stringify(filtered));
+      triggerToast("এডমিট কার্ড মুছে ফেলা হয়েছে (Local)।", "success");
+    }
+  };
+
+  // ------------------------------------
+  // 3. HALL OF FAME CRUD HANDLERS
+  // ------------------------------------
+  const handleSaveHallOfFame = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editHallOfFame || !editHallOfFame.name || !editHallOfFame.school) return;
+
+    try {
+      const isEdit = !!editHallOfFame.id;
+      const url = isEdit ? `/api/admin/hall-of-fame/${editHallOfFame.id}` : "/api/admin/hall-of-fame";
+      const method = isEdit ? "PUT" : "POST";
+
+      const res = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+          "x-admin-passcode": passcode
+        },
+        body: JSON.stringify(editHallOfFame)
+      });
+      const data = await res.json();
+      if (data.success) {
+        setHallOfFame(data.toppers);
+        setEditHallOfFame(null);
+        triggerToast("হল অফ ফেম টপার রেকর্ড সংরক্ষিত হয়েছে।", "success");
+      }
+    } catch (err) {
+      const updated = editHallOfFame.id
+        ? hallOfFame.map(t => t.id === editHallOfFame.id ? { ...t, ...editHallOfFame } as HallOfFameMember : t)
+        : [{ ...editHallOfFame, id: "hof-" + Date.now() } as HallOfFameMember, ...hallOfFame];
+      setHallOfFame(updated);
+      localStorage.setItem("medha_hall_of_fame", JSON.stringify(updated));
+      setEditHallOfFame(null);
+      triggerToast("হল অফ ফেম সংরক্ষিত হয়েছে (Local)।", "success");
+    }
+  };
+
+  const handleDeleteHallOfFame = async (id: string, name: string) => {
+    if (!confirm(`আপনি কি "${name}"-কে হল অফ ফেম থেকে মুছে ফেলতে চান?`)) return;
+    try {
+      const res = await fetch(`/api/admin/hall-of-fame/${id}`, {
+        method: "DELETE",
+        headers: { "x-admin-passcode": passcode }
+      });
+      const data = await res.json();
+      if (data.success) {
+        setHallOfFame(data.toppers);
+        triggerToast("টপার রেকর্ড মুছে ফেলা হয়েছে।", "success");
+      }
+    } catch (err) {
+      const filtered = hallOfFame.filter(t => t.id !== id);
+      setHallOfFame(filtered);
+      localStorage.setItem("medha_hall_of_fame", JSON.stringify(filtered));
+      triggerToast("টপার রেকর্ড মুছে ফেলা হয়েছে (Local)।", "success");
+    }
+  };
+
+  // ------------------------------------
+  // 4. CANDIDATE REGISTRATIONS HANDLERS
+  // ------------------------------------
+  const handleUpdateRegistrationStatus = async (id: string, status: "approved" | "rejected" | "pending") => {
+    try {
+      const res = await fetch(`/api/admin/registrations/${id}/status`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "x-admin-passcode": passcode
+        },
+        body: JSON.stringify({ status })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setRegistrations(data.registrations);
+        triggerToast(`আবেদনের স্ট্যাটাস পরিবর্তিত: ${status}`, "success");
+      }
+    } catch (err) {
+      const updated = registrations.map(r => r.id === id ? { ...r, status } : r);
+      setRegistrations(updated);
+      localStorage.setItem("medha_local_registrations", JSON.stringify(updated));
+      triggerToast(`আবেদনের স্ট্যাটাস পরিবর্তিত: ${status} (Local)`, "success");
+    }
+  };
+
+  const handleConvertToResult = async (id: string, studentName: string) => {
+    if (!confirm(`"${studentName}"-এর আবেদনটি অনুমোদন করে রোল নম্বর ও এডমিট কার্ড তৈরি করতে চান?`)) return;
+    try {
+      const res = await fetch(`/api/admin/registrations/${id}/convert-to-result`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-admin-passcode": passcode
+        }
+      });
+      const data = await res.json();
+      if (data.success) {
+        if (data.registrations) setRegistrations(data.registrations);
+        if (data.results) setResults(data.results);
+        if (data.admitCards) setAdmitCards(data.admitCards);
+        triggerToast(data.message || "ক্যান্ডিডেট সফলভাবে তালিকাভুক্ত হয়েছে!", "success");
+      }
+    } catch (err) {
+      triggerToast("সার্ভার ত্রুটি। অনুগ্রহ করে আবার চেষ্টা করুন।", "error");
+    }
+  };
+
+  const handleDeleteRegistration = async (id: string, name: string) => {
+    if (!confirm(`আপনি কি "${name}"-এর আবেদনপত্রটি স্থায়ীভাবে মুছে ফেলতে চান?`)) return;
+    try {
+      const res = await fetch(`/api/admin/registrations/${id}`, {
+        method: "DELETE",
+        headers: { "x-admin-passcode": passcode }
+      });
+      const data = await res.json();
+      if (data.success) {
+        setRegistrations(data.registrations);
+        triggerToast("আবেদনপত্র মুছে ফেলা হয়েছে।", "success");
+      }
+    } catch (err) {
+      const filtered = registrations.filter(r => r.id !== id);
+      setRegistrations(filtered);
+      localStorage.setItem("medha_local_registrations", JSON.stringify(filtered));
+      triggerToast("আবেদনপত্র মুছে ফেলা হয়েছে (Local)।", "success");
+    }
+  };
+
+  // ------------------------------------
+  // 5. AI CHATBOT SETTINGS HANDLER
+  // ------------------------------------
+  const handleSaveChatbotSettings = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const res = await fetch("/api/admin/chatbot-settings", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-admin-passcode": passcode
+        },
+        body: JSON.stringify(chatbotConfig)
+      });
+      const data = await res.json();
+      if (data.success) {
+        triggerToast("এআই চ্যাটবট ও এফএকিউ সেটিংস সংরক্ষিত হয়েছে!", "success");
+      }
+    } catch (err) {
+      localStorage.setItem("medha_chatbot_settings", JSON.stringify(chatbotConfig));
+      triggerToast("চ্যাটবট সেটিংস সংরক্ষিত হয়েছে (Local)।", "success");
+    }
+  };
+
   // UI rendering login panel
   if (!isAuthenticated) {
     return (
@@ -1086,76 +1439,142 @@ export default function AdminDashboard({ settings, onRefreshSettings, showToast 
       <div className="flex flex-wrap gap-2 border-b border-gray-100 pb-3">
         {userRole !== "member" && (
           <button
-            onClick={() => {
-              setActiveSubTab("appearance");
-            }}
-            className={`px-4.5 py-2 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ${
-              activeSubTab === "appearance" ? "bg-amber-500 text-indigo-950 shadow-md" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            onClick={() => setActiveSubTab("appearance")}
+            className={`px-3.5 py-2 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ${
+              activeSubTab === "appearance" ? "bg-amber-500 text-indigo-950 font-black shadow-md" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
             }`}
           >
-            <span>🎨 Website CMS / ওয়েবসাইট সিএমএস</span>
+            <span>🎨 Website CMS</span>
           </button>
         )}
-        {userRole === "superadmin" && (
-          <button
-            onClick={() => setActiveSubTab("media_center")}
-            className={`px-4.5 py-2 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ${
-              activeSubTab === "media_center" ? "bg-amber-500 text-indigo-950 shadow-md" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-            }`}
-          >
-            <Image className="w-3.5 h-3.5" />
-            <span>🖼️ Media Center</span>
-          </button>
-        )}
+
         <button
           onClick={() => setActiveSubTab("results")}
-          className={`px-4.5 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer ${
-            activeSubTab === "results" ? "bg-amber-500 text-indigo-950 shadow-md" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+          className={`px-3.5 py-2 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ${
+            activeSubTab === "results" ? "bg-amber-500 text-indigo-950 font-black shadow-md" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
           }`}
         >
-          <span>1. Marks & Student Result Manager ({results.length})</span>
+          <Award className="w-3.5 h-3.5 text-indigo-950" />
+          <span>ফলাফল ({results.length})</span>
         </button>
+
+        {userRole !== "member" && (
+          <button
+            onClick={() => setActiveSubTab("mock_tests")}
+            className={`px-3.5 py-2 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ${
+              activeSubTab === "mock_tests" ? "bg-amber-500 text-indigo-950 font-black shadow-md" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            }`}
+          >
+            <BookOpen className="w-3.5 h-3.5" />
+            <span>📝 মক টেস্ট ব্যাংক ({mockQuestions.length})</span>
+          </button>
+        )}
+
+        {userRole !== "member" && (
+          <button
+            onClick={() => setActiveSubTab("admit_cards")}
+            className={`px-3.5 py-2 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ${
+              activeSubTab === "admit_cards" ? "bg-amber-500 text-indigo-950 font-black shadow-md" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            }`}
+          >
+            <Ticket className="w-3.5 h-3.5" />
+            <span>🎟️ এডমিট কার্ড ({admitCards.length})</span>
+          </button>
+        )}
+
+        {userRole !== "member" && (
+          <button
+            onClick={() => setActiveSubTab("hall_of_fame")}
+            className={`px-3.5 py-2 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ${
+              activeSubTab === "hall_of_fame" ? "bg-amber-500 text-indigo-950 font-black shadow-md" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            }`}
+          >
+            <Trophy className="w-3.5 h-3.5" />
+            <span>🏆 হল অফ ফেম ({hallOfFame.length})</span>
+          </button>
+        )}
+
+        {userRole !== "member" && (
+          <button
+            onClick={() => setActiveSubTab("registrations")}
+            className={`px-3.5 py-2 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ${
+              activeSubTab === "registrations" ? "bg-amber-500 text-indigo-950 font-black shadow-md" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            }`}
+          >
+            <UserPlus className="w-3.5 h-3.5" />
+            <span>✍️ আবেদনপত্র ({registrations.length})</span>
+          </button>
+        )}
+
         {userRole !== "member" && (
           <button
             onClick={() => setActiveSubTab("archives")}
-            className={`px-4.5 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer ${
-              activeSubTab === "archives" ? "bg-amber-500 text-indigo-950 shadow-md" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            className={`px-3.5 py-2 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ${
+              activeSubTab === "archives" ? "bg-amber-500 text-indigo-950 font-black shadow-md" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
             }`}
           >
-            <span>2. Question/Archive Manager</span>
+            <FileSpreadsheet className="w-3.5 h-3.5" />
+            <span>📚 আর্কাইভ ({archives.length})</span>
           </button>
         )}
-        {/* Feedback and Helpline subtabs deleted successfully */}
+
+        {userRole !== "member" && (
+          <button
+            onClick={() => setActiveSubTab("ai_chatbot")}
+            className={`px-3.5 py-2 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ${
+              activeSubTab === "ai_chatbot" ? "bg-amber-500 text-indigo-950 font-black shadow-md" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            }`}
+          >
+            <Bot className="w-3.5 h-3.5" />
+            <span>🤖 এআই চ্যাটবট</span>
+          </button>
+        )}
+
+        {userRole === "superadmin" && (
+          <button
+            onClick={() => setActiveSubTab("media_center")}
+            className={`px-3.5 py-2 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ${
+              activeSubTab === "media_center" ? "bg-amber-500 text-indigo-950 font-black shadow-md" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            }`}
+          >
+            <Image className="w-3.5 h-3.5" />
+            <span>🖼️ মিডিয়া</span>
+          </button>
+        )}
+
         {settings?.is_results_live && (
           <button
             onClick={() => setActiveSubTab("download_center")}
-            className={`px-4.5 py-2 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ${
-              activeSubTab === "download_center" ? "bg-amber-500 text-indigo-950 shadow-md" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            className={`px-3.5 py-2 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ${
+              activeSubTab === "download_center" ? "bg-amber-500 text-indigo-950 font-black shadow-md" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
             }`}
           >
             <FileDown className="w-3.5 h-3.5" />
-            <span>📥 Download Center</span>
+            <span>📥 ডাউনলোড</span>
           </button>
         )}
+
         {userRole === "superadmin" && (
           <button
             onClick={() => setActiveSubTab("activity_logs")}
-            className={`px-4.5 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer ${
-              activeSubTab === "activity_logs" ? "bg-amber-500 text-indigo-950 shadow-md" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            className={`px-3.5 py-2 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ${
+              activeSubTab === "activity_logs" ? "bg-amber-500 text-indigo-950 font-black shadow-md" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
             }`}
           >
-            <span>🛡️ Super Audit Trailling Logs ({activityLogs.length})</span>
+            <ShieldAlert className="w-3.5 h-3.5" />
+            <span>🛡️ অডিট লগ</span>
           </button>
         )}
+
         {userRole === "superadmin" && (
           <button
             onClick={() => setActiveSubTab("visitor_logs")}
-            className={`px-4.5 py-2 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ${
-              activeSubTab === "visitor_logs" ? "bg-amber-500 text-indigo-950 shadow-md" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            className={`px-3.5 py-2 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ${
+              activeSubTab === "visitor_logs" ? "bg-amber-500 text-indigo-950 font-black shadow-md" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
             }`}
           >
             <Activity className="w-3.5 h-3.5" />
-            <span>📊 Visitor Insights & Search Logs / ইউজার ট্র্যাকিং</span>
+            <span>📊 ভিজিটর ট্র্যাকিং</span>
           </button>
         )}
       </div>
@@ -3115,6 +3534,1076 @@ export default function AdminDashboard({ settings, onRefreshSettings, showToast 
           </div>
 
         </div>
+      )}
+
+      {/* -------------------------------------------
+          SUB-TAB: MOCK TEST QUESTION BANK MANAGER
+          ------------------------------------------- */}
+      {activeSubTab === "mock_tests" && (
+        <div className="space-y-6 animate-fade-in text-left">
+          <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm flex items-center justify-between flex-wrap gap-4">
+            <div>
+              <h3 className="font-extrabold text-indigo-950 text-sm flex items-center gap-2">
+                <BookOpen className="w-5 h-5 text-amber-500" />
+                <span>মক টেস্ট প্রশ্ন ব্যাংক কন্ট্রোল (Mock Test Question Bank)</span>
+                <span className="text-[10px] bg-amber-100 text-amber-900 font-extrabold px-2.5 py-0.5 rounded-full">
+                  মোট প্রশ্ন: {mockQuestions.length}
+                </span>
+              </h3>
+              <p className="text-xs text-gray-500 mt-1">
+                Class I থেকে Class X পর্যন্ত বাংলা, গণিত, বিজ্ঞান ও সাধারণ জ্ঞানের MCQ প্রশ্ন, সঠিক উত্তর ও সমাধান ব্যাখ্যা পরিচালনা করুন।
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setEditMockQuestion({
+                  classLevel: mockClassFilter !== "All" ? mockClassFilter : "Class V",
+                  subject: mockSubjectFilter !== "All" ? (mockSubjectFilter as any) : "Bengali",
+                  questionBn: "",
+                  options: ["", "", "", ""],
+                  correctIndex: 0,
+                  explanationBn: ""
+                });
+                window.scrollTo({ top: 400, behavior: "smooth" });
+              }}
+              className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-indigo-950 font-black text-xs rounded-xl shadow transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
+            >
+              <Plus className="w-4 h-4" />
+              <span>নতুন প্রশ্ন যোগ করুন (Add Question)</span>
+            </button>
+          </div>
+
+          {/* Filters Bar */}
+          <div className="flex flex-wrap gap-3 bg-slate-50 p-4 rounded-2xl border border-gray-200 items-center justify-between">
+            <div className="flex flex-wrap gap-2 items-center">
+              <span className="text-xs font-bold text-gray-600 flex items-center gap-1">
+                <Filter className="w-3.5 h-3.5 text-amber-500" /> ক্লাস ফিল্টার:
+              </span>
+              <select
+                value={mockClassFilter}
+                onChange={(e) => setMockClassFilter(e.target.value)}
+                className="px-3 py-1.5 text-xs font-bold bg-white border border-gray-200 rounded-lg text-indigo-950 cursor-pointer"
+              >
+                <option value="All">সকল ক্লাস (All Classes)</option>
+                {["Class I", "Class II", "Class III", "Class IV", "Class V", "Class VI", "Class VII", "Class VIII", "Class IX", "Class X"].map(c => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+
+              <span className="text-xs font-bold text-gray-600 ml-2">বিষয়:</span>
+              <select
+                value={mockSubjectFilter}
+                onChange={(e) => setMockSubjectFilter(e.target.value)}
+                className="px-3 py-1.5 text-xs font-bold bg-white border border-gray-200 rounded-lg text-indigo-950 cursor-pointer"
+              >
+                <option value="All">সকল বিষয় (All Subjects)</option>
+                <option value="Bengali">বাংলা (Bengali)</option>
+                <option value="Mathematics">গণিত (Mathematics)</option>
+                <option value="Science">বিজ্ঞান (Science)</option>
+                <option value="General Knowledge">সাধারণ জ্ঞান (GK)</option>
+              </select>
+            </div>
+            <span className="text-xs text-gray-500 font-bold">
+              প্রদর্শিত প্রশ্ন: {
+                mockQuestions.filter(q => (mockClassFilter === "All" || q.classLevel === mockClassFilter) && (mockSubjectFilter === "All" || q.subject === mockSubjectFilter)).length
+              } টি
+            </span>
+          </div>
+
+          {/* Add / Edit Form Modal/Drawer */}
+          {editMockQuestion && (
+            <form onSubmit={handleSaveMockQuestion} className="bg-white p-6 rounded-2xl border-2 border-amber-400 shadow-xl space-y-4">
+              <div className="flex items-center justify-between border-b pb-3">
+                <h4 className="font-black text-sm text-indigo-950 flex items-center gap-2">
+                  <Edit className="w-4 h-4 text-amber-500" />
+                  <span>{editMockQuestion.id ? "প্রশ্ন সম্পাদনা করুন (Edit Question)" : "নতুন প্রশ্ন তৈরি করুন (New Question)"}</span>
+                </h4>
+                <button
+                  type="button"
+                  onClick={() => setEditMockQuestion(null)}
+                  className="p-1 hover:bg-gray-100 rounded-lg text-gray-500"
+                >
+                  <EyeOff className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">ক্লাস (Class Level)</label>
+                  <select
+                    value={editMockQuestion.classLevel || "Class V"}
+                    onChange={(e) => setEditMockQuestion({ ...editMockQuestion, classLevel: e.target.value })}
+                    className="w-full px-3 py-2 border rounded-xl text-xs bg-white text-indigo-950 font-bold"
+                  >
+                    {["Class I", "Class II", "Class III", "Class IV", "Class V", "Class VI", "Class VII", "Class VIII", "Class IX", "Class X"].map(c => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">বিষয় (Subject)</label>
+                  <select
+                    value={editMockQuestion.subject || "Bengali"}
+                    onChange={(e: any) => setEditMockQuestion({ ...editMockQuestion, subject: e.target.value })}
+                    className="w-full px-3 py-2 border rounded-xl text-xs bg-white text-indigo-950 font-bold"
+                  >
+                    <option value="Bengali">বাংলা (Bengali)</option>
+                    <option value="Mathematics">গণিত (Mathematics)</option>
+                    <option value="Science">বিজ্ঞান (Science)</option>
+                    <option value="General Knowledge">সাধারণ জ্ঞান (GK)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1">প্রশ্ন (Question in Bengali) *</label>
+                <textarea
+                  rows={3}
+                  required
+                  placeholder="যেমন: নিচের কোনটি মৌলিক সংখ্যা?"
+                  value={editMockQuestion.questionBn || ""}
+                  onChange={(e) => setEditMockQuestion({ ...editMockQuestion, questionBn: e.target.value })}
+                  className="w-full p-3 border rounded-xl text-xs text-gray-900 bg-slate-50 focus:bg-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-2">৪টি বিকল্প এবং সঠিক উত্তর নির্ধারণ করুন *</label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {[0, 1, 2, 3].map((optIdx) => (
+                    <div
+                      key={optIdx}
+                      className={`p-3 rounded-xl border flex items-center gap-2 ${
+                        editMockQuestion.correctIndex === optIdx
+                          ? "border-emerald-500 bg-emerald-50/50"
+                          : "border-gray-200 bg-white"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="correctIndex"
+                        id={`opt-radio-${optIdx}`}
+                        checked={editMockQuestion.correctIndex === optIdx}
+                        onChange={() => setEditMockQuestion({ ...editMockQuestion, correctIndex: optIdx })}
+                        className="w-4 h-4 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                      />
+                      <span className="text-xs font-black font-mono w-5">({String.fromCharCode(65 + optIdx)})</span>
+                      <input
+                        type="text"
+                        required
+                        placeholder={`বিকল্প ${optIdx + 1}...`}
+                        value={editMockQuestion.options?.[optIdx] || ""}
+                        onChange={(e) => {
+                          const newOpts = [...(editMockQuestion.options || ["", "", "", ""])] as [string, string, string, string];
+                          newOpts[optIdx] = e.target.value;
+                          setEditMockQuestion({ ...editMockQuestion, options: newOpts });
+                        }}
+                        className="flex-1 px-2.5 py-1.5 border rounded-lg text-xs bg-white text-gray-900"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1">সমাধান ও ব্যাখ্যা (Explanation in Bengali)</label>
+                <textarea
+                  rows={2}
+                  placeholder="যেমন: কারণ ২ কেবল ১ ও ২ দ্বারা বিভাজ্য..."
+                  value={editMockQuestion.explanationBn || ""}
+                  onChange={(e) => setEditMockQuestion({ ...editMockQuestion, explanationBn: e.target.value })}
+                  className="w-full p-3 border rounded-xl text-xs text-gray-900 bg-slate-50 focus:bg-white"
+                />
+              </div>
+
+              <div className="flex justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setEditMockQuestion(null)}
+                  className="px-4 py-2 border rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-100"
+                >
+                  বাতিল করুন (Cancel)
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs rounded-xl shadow cursor-pointer active:scale-95"
+                >
+                  সংরক্ষণ করুন (Save Question)
+                </button>
+              </div>
+            </form>
+          )}
+
+          {/* Question List Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {mockQuestions
+              .filter(q => (mockClassFilter === "All" || q.classLevel === mockClassFilter) && (mockSubjectFilter === "All" || q.subject === mockSubjectFilter))
+              .map((q, idx) => (
+                <div key={q.id || idx} className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm space-y-3 relative hover:shadow-md transition-shadow">
+                  <div className="flex items-center justify-between gap-2 border-b pb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-indigo-50 text-indigo-900 border border-indigo-200">
+                        {q.classLevel}
+                      </span>
+                      <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-amber-50 text-amber-900 border border-amber-200">
+                        {q.subject}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        onClick={() => {
+                          setEditMockQuestion(q);
+                          window.scrollTo({ top: 400, behavior: "smooth" });
+                        }}
+                        className="p-1 px-2 text-[10px] font-bold bg-indigo-50 text-indigo-900 rounded hover:bg-indigo-100 transition-colors"
+                      >
+                        <Edit className="w-3 h-3 inline mr-0.5" /> Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteMockQuestion(q.id)}
+                        className="p-1 px-2 text-[10px] font-bold bg-rose-50 text-rose-700 rounded hover:bg-rose-100 transition-colors"
+                      >
+                        <Trash2 className="w-3 h-3 inline mr-0.5" /> Delete
+                      </button>
+                    </div>
+                  </div>
+
+                  <p className="text-xs font-bold text-gray-900 leading-relaxed">
+                    <span className="text-amber-600 font-mono mr-1">Q{idx + 1}.</span> {q.questionBn}
+                  </p>
+
+                  <div className="grid grid-cols-2 gap-2 text-[11px]">
+                    {q.options.map((opt, oIdx) => (
+                      <div
+                        key={oIdx}
+                        className={`p-2 rounded-lg border font-medium ${
+                          q.correctIndex === oIdx
+                            ? "bg-emerald-50 text-emerald-900 border-emerald-300 font-bold"
+                            : "bg-gray-50 text-gray-700 border-gray-200"
+                        }`}
+                      >
+                        <span className="font-mono font-bold mr-1">({String.fromCharCode(65 + oIdx)})</span> {opt}
+                        {q.correctIndex === oIdx && <Check className="w-3.5 h-3.5 text-emerald-600 inline ml-1" />}
+                      </div>
+                    ))}
+                  </div>
+
+                  {q.explanationBn && (
+                    <div className="p-2.5 bg-slate-50 rounded-xl text-[10.5px] text-gray-600 border border-gray-100 leading-normal">
+                      <span className="font-bold text-indigo-950">💡 সমাধান:</span> {q.explanationBn}
+                    </div>
+                  )}
+                </div>
+              ))}
+          </div>
+        </div>
+      )}
+
+      {/* -------------------------------------------
+          SUB-TAB: ADMIT CARDS & VENUE MANAGER
+          ------------------------------------------- */}
+      {activeSubTab === "admit_cards" && (
+        <div className="space-y-6 animate-fade-in text-left">
+          <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm flex items-center justify-between flex-wrap gap-4">
+            <div>
+              <h3 className="font-extrabold text-indigo-950 text-sm flex items-center gap-2">
+                <Ticket className="w-5 h-5 text-amber-500" />
+                <span>এডমিট কার্ড ও সিট বিন্যাস কন্ট্রোল (Admit Cards & Center Venue)</span>
+                <span className="text-[10px] bg-amber-100 text-amber-900 font-extrabold px-2.5 py-0.5 rounded-full">
+                  মোট ইস্যুকৃত: {admitCards.length}
+                </span>
+              </h3>
+              <p className="text-xs text-gray-500 mt-1">
+                পরীক্ষার্থীদের এডমিট কার্ড, নির্ধারিত পরীক্ষার কেন্দ্র, রুম নম্বর, বেঞ্চ নম্বর এবং রিপোর্টিং সময় নিয়ন্ত্রণ করুন।
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setEditAdmitCard({
+                  rollNo: `MA-2026-${Math.floor(100 + Math.random() * 900)}`,
+                  name: "",
+                  guardianName: "",
+                  classLevel: "Class V",
+                  school: "",
+                  centerName: "Mayapur High School Center",
+                  centerAddress: "Mayapur, Hooghly, West Bengal - 712413",
+                  roomNo: "Room No. 01",
+                  seatNo: "Bench A-01",
+                  examDate: localSettings?.examDate || "রবিবার, ২৯শে নভেম্বর, ২০২৬",
+                  reportingTime: "সকাল ১০:৩০ টা",
+                  examTime: "সকাল ১১:০০ টা - দুপুর ১:০০ টা"
+                });
+                window.scrollTo({ top: 400, behavior: "smooth" });
+              }}
+              className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-indigo-950 font-black text-xs rounded-xl shadow transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
+            >
+              <Plus className="w-4 h-4" />
+              <span>নতুন এডমিট কার্ড তৈরি করুন (Issue Admit Card)</span>
+            </button>
+          </div>
+
+          {/* Search Bar */}
+          <div className="bg-slate-50 p-4 rounded-2xl border border-gray-200 flex items-center justify-between gap-4 flex-wrap">
+            <div className="flex-1 min-w-[240px] relative">
+              <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="রোল নম্বর, পরীক্ষার্থীর নাম অথবা স্কুল দিয়ে খুঁজুন..."
+                value={admitCardSearch}
+                onChange={(e) => setAdmitCardSearch(e.target.value)}
+                className="w-full pl-9 pr-4 py-2 text-xs bg-white border border-gray-200 rounded-xl"
+              />
+            </div>
+            <span className="text-xs font-bold text-gray-500">
+              ফলাফল: {
+                admitCards.filter(c =>
+                  !admitCardSearch.trim() ||
+                  c.rollNo.toLowerCase().includes(admitCardSearch.toLowerCase()) ||
+                  c.name.toLowerCase().includes(admitCardSearch.toLowerCase()) ||
+                  c.school.toLowerCase().includes(admitCardSearch.toLowerCase())
+                ).length
+              } টি
+            </span>
+          </div>
+
+          {/* Add / Edit Form */}
+          {editAdmitCard && (
+            <form onSubmit={handleSaveAdmitCard} className="bg-white p-6 rounded-2xl border-2 border-amber-400 shadow-xl space-y-4">
+              <div className="flex items-center justify-between border-b pb-3">
+                <h4 className="font-black text-sm text-indigo-950 flex items-center gap-2">
+                  <Edit className="w-4 h-4 text-amber-500" />
+                  <span>এডমিট কার্ড বিবরণ সম্পাদনা (Edit Admit Card)</span>
+                </h4>
+                <button
+                  type="button"
+                  onClick={() => setEditAdmitCard(null)}
+                  className="p-1 hover:bg-gray-100 rounded-lg text-gray-500"
+                >
+                  <EyeOff className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">রোল নম্বর (Roll Number) *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. MA-2026-601"
+                    value={editAdmitCard.rollNo || ""}
+                    onChange={(e) => setEditAdmitCard({ ...editAdmitCard, rollNo: e.target.value.toUpperCase() })}
+                    className="w-full px-3 py-2 border rounded-xl text-xs font-mono font-bold bg-slate-50"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">পরীক্ষার্থীর নাম (Student Name) *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Rahul Khatua"
+                    value={editAdmitCard.name || ""}
+                    onChange={(e) => setEditAdmitCard({ ...editAdmitCard, name: e.target.value })}
+                    className="w-full px-3 py-2 border rounded-xl text-xs font-bold"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">অভিভাবকের নাম (Guardian Name)</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Santanu Khatua"
+                    value={editAdmitCard.guardianName || ""}
+                    onChange={(e) => setEditAdmitCard({ ...editAdmitCard, guardianName: e.target.value })}
+                    className="w-full px-3 py-2 border rounded-xl text-xs"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">ক্লাস (Class Level)</label>
+                  <select
+                    value={editAdmitCard.classLevel || "Class V"}
+                    onChange={(e) => setEditAdmitCard({ ...editAdmitCard, classLevel: e.target.value })}
+                    className="w-full px-3 py-2 border rounded-xl text-xs bg-white font-bold"
+                  >
+                    {["Class I", "Class II", "Class III", "Class IV", "Class V", "Class VI", "Class VII", "Class VIII", "Class IX", "Class X"].map(c => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-bold text-gray-700 mb-1">স্কুলের নাম (School Name)</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Mayapur High School"
+                    value={editAdmitCard.school || ""}
+                    onChange={(e) => setEditAdmitCard({ ...editAdmitCard, school: e.target.value })}
+                    className="w-full px-3 py-2 border rounded-xl text-xs"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">পরীক্ষাকেন্দ্রের নাম (Center Venue)</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Mayapur High School Center"
+                    value={editAdmitCard.centerName || ""}
+                    onChange={(e) => setEditAdmitCard({ ...editAdmitCard, centerName: e.target.value })}
+                    className="w-full px-3 py-2 border rounded-xl text-xs font-bold"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">কেন্দ্রের ঠিকানা (Venue Address)</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Mayapur, Hooghly, West Bengal - 712413"
+                    value={editAdmitCard.centerAddress || ""}
+                    onChange={(e) => setEditAdmitCard({ ...editAdmitCard, centerAddress: e.target.value })}
+                    className="w-full px-3 py-2 border rounded-xl text-xs"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">রুম নম্বর</label>
+                  <input
+                    type="text"
+                    value={editAdmitCard.roomNo || "Room No. 01"}
+                    onChange={(e) => setEditAdmitCard({ ...editAdmitCard, roomNo: e.target.value })}
+                    className="w-full px-3 py-2 border rounded-xl text-xs"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">বেঞ্চ / সিট নম্বর</label>
+                  <input
+                    type="text"
+                    value={editAdmitCard.seatNo || "Bench A-01"}
+                    onChange={(e) => setEditAdmitCard({ ...editAdmitCard, seatNo: e.target.value })}
+                    className="w-full px-3 py-2 border rounded-xl text-xs font-mono font-bold"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">রিপোর্টিং টাইম</label>
+                  <input
+                    type="text"
+                    value={editAdmitCard.reportingTime || "সকাল ১০:৩০ টা"}
+                    onChange={(e) => setEditAdmitCard({ ...editAdmitCard, reportingTime: e.target.value })}
+                    className="w-full px-3 py-2 border rounded-xl text-xs"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">পরীক্ষার সময়</label>
+                  <input
+                    type="text"
+                    value={editAdmitCard.examTime || "সকাল ১১:০০ টা - দুপুর ১:০০ টা"}
+                    onChange={(e) => setEditAdmitCard({ ...editAdmitCard, examTime: e.target.value })}
+                    className="w-full px-3 py-2 border rounded-xl text-xs"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setEditAdmitCard(null)}
+                  className="px-4 py-2 border rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-100"
+                >
+                  বাতিল করুন (Cancel)
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs rounded-xl shadow cursor-pointer active:scale-95"
+                >
+                  সংরক্ষণ করুন (Save Admit Card)
+                </button>
+              </div>
+            </form>
+          )}
+
+          {/* Admit Cards Table */}
+          <div className="bg-white rounded-2xl border shadow-sm border-gray-200 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="bg-indigo-950 text-white font-semibold">
+                    <th className="p-3 pl-4">রোল নম্বর</th>
+                    <th className="p-3">পরীক্ষার্থীর নাম</th>
+                    <th className="p-3">ক্লাস</th>
+                    <th className="p-3">স্কুল</th>
+                    <th className="p-3">পরীক্ষাকেন্দ্র</th>
+                    <th className="p-3 text-center">রুম ও সিট</th>
+                    <th className="p-3 pr-4 text-center">অ্যাকশন</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100 font-sans">
+                  {admitCards
+                    .filter(c =>
+                      !admitCardSearch.trim() ||
+                      c.rollNo.toLowerCase().includes(admitCardSearch.toLowerCase()) ||
+                      c.name.toLowerCase().includes(admitCardSearch.toLowerCase()) ||
+                      c.school.toLowerCase().includes(admitCardSearch.toLowerCase())
+                    )
+                    .map((card) => (
+                      <tr key={card.rollNo} className="hover:bg-slate-50/70">
+                        <td className="p-2.5 pl-4 font-mono font-black text-indigo-900">{card.rollNo}</td>
+                        <td className="p-2.5 font-bold text-gray-900">{card.name}</td>
+                        <td className="p-2.5 font-semibold text-gray-700">{card.classLevel}</td>
+                        <td className="p-2.5 text-gray-600">{card.school}</td>
+                        <td className="p-2.5 text-gray-700 text-[11px]">{card.centerName}</td>
+                        <td className="p-2.5 text-center font-mono font-bold text-amber-700">{card.roomNo}, {card.seatNo}</td>
+                        <td className="p-2.5 pr-4 text-center">
+                          <div className="flex items-center justify-center gap-1.5">
+                            <button
+                              onClick={() => {
+                                setEditAdmitCard(card);
+                                window.scrollTo({ top: 400, behavior: "smooth" });
+                              }}
+                              className="p-1 px-2 text-[10px] font-bold bg-indigo-50 text-indigo-900 rounded hover:bg-indigo-100"
+                            >
+                              <Edit className="w-3 h-3 inline mr-0.5" /> Edit
+                            </button>
+                            <button
+                              onClick={() => handleDeleteAdmitCard(card.rollNo, card.name)}
+                              className="p-1 px-2 text-[10px] font-bold bg-rose-50 text-rose-700 rounded hover:bg-rose-100"
+                            >
+                              <Trash2 className="w-3 h-3 inline mr-0.5" /> Delete
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* -------------------------------------------
+          SUB-TAB: HALL OF FAME TOPPERS MANAGER
+          ------------------------------------------- */}
+      {activeSubTab === "hall_of_fame" && (
+        <div className="space-y-6 animate-fade-in text-left">
+          <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm flex items-center justify-between flex-wrap gap-4">
+            <div>
+              <h3 className="font-extrabold text-indigo-950 text-sm flex items-center gap-2">
+                <Trophy className="w-5 h-5 text-amber-500" />
+                <span>হল অফ ফেম ও টপার তালিকা কন্ট্রোল (Hall of Fame & Awards)</span>
+                <span className="text-[10px] bg-amber-100 text-amber-900 font-extrabold px-2.5 py-0.5 rounded-full">
+                  মোট টপার: {hallOfFame.length}
+                </span>
+              </h3>
+              <p className="text-xs text-gray-500 mt-1">
+                বিগত ও বর্তমান বর্ষের ১ম, ২য় ও ৩য় স্থানাধিকারী কৃতী শিক্ষার্থীদের ছবি, প্রাপ্ত নম্বর, মেডেল ও বাণী পরিচালনা করুন।
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setEditHallOfFame({
+                  name: "",
+                  year: 2026,
+                  classLevel: "Class VIII",
+                  rank: 1,
+                  score: 48,
+                  maxScore: 50,
+                  school: "",
+                  trophyType: "gold",
+                  quoteBn: "নিয়মিত অধ্যয়ন ও অধ্যাবসায়ই সাফল্যের চাবিকাঠি।",
+                  achievementBadge: "Gold Medalist (Rank 1)"
+                });
+                window.scrollTo({ top: 400, behavior: "smooth" });
+              }}
+              className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-indigo-950 font-black text-xs rounded-xl shadow transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
+            >
+              <Plus className="w-4 h-4" />
+              <span>নতুন টপার যুক্ত করুন (Add Topper)</span>
+            </button>
+          </div>
+
+          {/* Add / Edit Form */}
+          {editHallOfFame && (
+            <form onSubmit={handleSaveHallOfFame} className="bg-white p-6 rounded-2xl border-2 border-amber-400 shadow-xl space-y-4">
+              <div className="flex items-center justify-between border-b pb-3">
+                <h4 className="font-black text-sm text-indigo-950 flex items-center gap-2">
+                  <Trophy className="w-4 h-4 text-amber-500" />
+                  <span>{editHallOfFame.id ? "টপার বিবরণ সম্পাদনা করুন (Edit Topper)" : "নতুন টপার রেকর্ড তৈরি করুন"}</span>
+                </h4>
+                <button
+                  type="button"
+                  onClick={() => setEditHallOfFame(null)}
+                  className="p-1 hover:bg-gray-100 rounded-lg text-gray-500"
+                >
+                  <EyeOff className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">শিক্ষার্থীর নাম (Student Name) *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Arpita Maiti"
+                    value={editHallOfFame.name || ""}
+                    onChange={(e) => setEditHallOfFame({ ...editHallOfFame, name: e.target.value })}
+                    className="w-full px-3 py-2 border rounded-xl text-xs font-bold"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">পরীক্ষার বছর (Academic Year)</label>
+                  <input
+                    type="number"
+                    required
+                    value={editHallOfFame.year || 2026}
+                    onChange={(e) => setEditHallOfFame({ ...editHallOfFame, year: Number(e.target.value) || 2026 })}
+                    className="w-full px-3 py-2 border rounded-xl text-xs font-mono font-bold"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">ক্লাস (Class Level)</label>
+                  <select
+                    value={editHallOfFame.classLevel || "Class VIII"}
+                    onChange={(e) => setEditHallOfFame({ ...editHallOfFame, classLevel: e.target.value })}
+                    className="w-full px-3 py-2 border rounded-xl text-xs bg-white font-bold"
+                  >
+                    {["Class I", "Class II", "Class III", "Class IV", "Class V", "Class VI", "Class VII", "Class VIII", "Class IX", "Class X"].map(c => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">মেধা র‍্যাংক (Rank: 1, 2, 3)</label>
+                  <select
+                    value={editHallOfFame.rank || 1}
+                    onChange={(e) => {
+                      const r = Number(e.target.value) as 1 | 2 | 3;
+                      const trophy = r === 1 ? "gold" : r === 2 ? "silver" : "bronze";
+                      setEditHallOfFame({ ...editHallOfFame, rank: r, trophyType: trophy });
+                    }}
+                    className="w-full px-3 py-2 border rounded-xl text-xs bg-white font-bold text-indigo-950"
+                  >
+                    <option value={1}>১ম স্থান (Rank 1 - Gold)</option>
+                    <option value={2}>২য় স্থান (Rank 2 - Silver)</option>
+                    <option value={3}>৩য় স্থান (Rank 3 - Bronze)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">প্রাপ্ত নম্বর (Score / 50)</label>
+                  <input
+                    type="number"
+                    value={editHallOfFame.score || 48}
+                    onChange={(e) => setEditHallOfFame({ ...editHallOfFame, score: Number(e.target.value) || 0 })}
+                    className="w-full px-3 py-2 border rounded-xl text-xs font-mono font-bold"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">স্কুলের নাম (School Name) *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Palaspai High School"
+                    value={editHallOfFame.school || ""}
+                    onChange={(e) => setEditHallOfFame({ ...editHallOfFame, school: e.target.value })}
+                    className="w-full px-3 py-2 border rounded-xl text-xs"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">সম্মাননা ব্যাজ (Achievement Badge)</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Gold Medalist (98% Score)"
+                    value={editHallOfFame.achievementBadge || ""}
+                    onChange={(e) => setEditHallOfFame({ ...editHallOfFame, achievementBadge: e.target.value })}
+                    className="w-full px-3 py-2 border rounded-xl text-xs"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">কৃতী শিক্ষার্থীর বাণী (Quote in Bengali)</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. নিয়মিত অধ্যয়ন ও অধ্যাবসায়ই সাফল্যের চাবিকাঠি।"
+                    value={editHallOfFame.quoteBn || ""}
+                    onChange={(e) => setEditHallOfFame({ ...editHallOfFame, quoteBn: e.target.value })}
+                    className="w-full px-3 py-2 border rounded-xl text-xs"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setEditHallOfFame(null)}
+                  className="px-4 py-2 border rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-100"
+                >
+                  বাতিল করুন (Cancel)
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs rounded-xl shadow cursor-pointer active:scale-95"
+                >
+                  সংরক্ষণ করুন (Save Topper)
+                </button>
+              </div>
+            </form>
+          )}
+
+          {/* Hall of Fame List Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {hallOfFame.map((topper) => (
+              <div key={topper.id} className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm space-y-3 relative hover:shadow-md transition-shadow">
+                <div className="flex items-center justify-between border-b pb-2.5">
+                  <span className={`inline-flex items-center gap-1 text-[10px] font-black uppercase px-2.5 py-1 rounded-full ${
+                    topper.trophyType === "gold" ? "bg-amber-100 text-amber-900 border border-amber-300" :
+                    topper.trophyType === "silver" ? "bg-slate-100 text-slate-900 border border-slate-300" :
+                    "bg-amber-800 text-white"
+                  }`}>
+                    <Trophy className="w-3 h-3" />
+                    <span>Rank {topper.rank} • {topper.year}</span>
+                  </span>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => {
+                        setEditHallOfFame(topper);
+                        window.scrollTo({ top: 400, behavior: "smooth" });
+                      }}
+                      className="p-1 px-2 text-[10px] font-bold bg-indigo-50 text-indigo-900 rounded hover:bg-indigo-100"
+                    >
+                      <Edit className="w-3 h-3 inline mr-0.5" /> Edit
+                    </button>
+                    <button
+                      onClick={() => handleDeleteHallOfFame(topper.id, topper.name)}
+                      className="p-1 px-2 text-[10px] font-bold bg-rose-50 text-rose-700 rounded hover:bg-rose-100"
+                    >
+                      <Trash2 className="w-3 h-3 inline mr-0.5" /> Delete
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <h4 className="font-extrabold text-sm text-gray-900">{topper.name}</h4>
+                  <p className="text-[11px] text-gray-500 font-semibold">{topper.classLevel} • {topper.school}</p>
+                  <p className="text-xs font-mono font-black text-emerald-700">প্রাপ্ত নম্বর: {topper.score} / {topper.maxScore || 50}</p>
+                </div>
+
+                {topper.quoteBn && (
+                  <p className="text-[10.5px] italic text-gray-600 bg-slate-50 p-2.5 rounded-xl border border-gray-100 leading-normal">
+                    "{topper.quoteBn}"
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* -------------------------------------------
+          SUB-TAB: CANDIDATE PRE-REGISTRATIONS MANAGER
+          ------------------------------------------- */}
+      {activeSubTab === "registrations" && (
+        <div className="space-y-6 animate-fade-in text-left">
+          <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm flex items-center justify-between flex-wrap gap-4">
+            <div>
+              <h3 className="font-extrabold text-indigo-950 text-sm flex items-center gap-2">
+                <UserPlus className="w-5 h-5 text-amber-500" />
+                <span>অনলাইন আবেদনপত্র ম্যানেজমেন্ট (Candidate Pre-Registrations)</span>
+                <span className="text-[10px] bg-amber-100 text-amber-900 font-extrabold px-2.5 py-0.5 rounded-full">
+                  মোট জমা: {registrations.length}
+                </span>
+                <span className="text-[10px] bg-yellow-100 text-yellow-900 font-extrabold px-2 py-0.5 rounded-full">
+                  বিচারাধীন: {registrations.filter(r => r.status === "pending").length}
+                </span>
+              </h3>
+              <p className="text-xs text-gray-500 mt-1">
+                ছাত্রছাত্রী ও অভিভাবকদের জমা দেওয়া অনলাইন আবেদনপত্র পর্যালোচনা করুন, ১-ক্লিকে অনুমোদন দিন এবং স্বয়ংক্রিয় রোল নম্বর প্রদান করুন।
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={fetchAllDevData}
+              className="px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-900 font-bold text-xs rounded-xl transition-all flex items-center gap-1"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              <span>রিফ্রেশ করুন (Sync)</span>
+            </button>
+          </div>
+
+          {/* Filters Bar */}
+          <div className="bg-slate-50 p-4 rounded-2xl border border-gray-200 flex items-center justify-between gap-4 flex-wrap">
+            <div className="flex-1 min-w-[240px] relative">
+              <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="আবেদনকারীর নাম, ফোন নম্বর অথবা স্কুল দিয়ে খুঁজুন..."
+                value={regSearch}
+                onChange={(e) => setRegSearch(e.target.value)}
+                className="w-full pl-9 pr-4 py-2 text-xs bg-white border border-gray-200 rounded-xl"
+              />
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-gray-600">স্ট্যাটাস:</span>
+              <select
+                value={regStatusFilter}
+                onChange={(e: any) => setRegStatusFilter(e.target.value)}
+                className="px-3 py-1.5 text-xs font-bold bg-white border border-gray-200 rounded-lg text-indigo-950 cursor-pointer"
+              >
+                <option value="all">সকল আবেদন (All)</option>
+                <option value="pending">বিচারাধীন (Pending)</option>
+                <option value="approved">অনুমোদিত (Approved)</option>
+                <option value="rejected">বাতিলকৃত (Rejected)</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Registrations Table */}
+          <div className="bg-white rounded-2xl border shadow-sm border-gray-200 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="bg-indigo-950 text-white font-semibold">
+                    <th className="p-3 pl-4">অ্যাপ্লিকেশন আইডি</th>
+                    <th className="p-3">শিক্ষার্থীর নাম</th>
+                    <th className="p-3">অভিভাবক ও ফোন</th>
+                    <th className="p-3">ক্লাস</th>
+                    <th className="p-3">স্কুল ও ঠিকানা</th>
+                    <th className="p-3 text-center">স্ট্যাটাস</th>
+                    <th className="p-3 pr-4 text-center">অ্যাকশন</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100 font-sans">
+                  {registrations.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="text-center py-12 text-gray-400 italic">এখনও কোনো অনলাইন আবেদনপত্র জমা পড়েনি।</td>
+                    </tr>
+                  ) : (
+                    registrations
+                      .filter(r =>
+                        (regStatusFilter === "all" || r.status === regStatusFilter) &&
+                        (!regSearch.trim() ||
+                          r.studentName.toLowerCase().includes(regSearch.toLowerCase()) ||
+                          r.phone.includes(regSearch) ||
+                          r.schoolName.toLowerCase().includes(regSearch.toLowerCase()) ||
+                          r.applicationId.toLowerCase().includes(regSearch.toLowerCase()))
+                      )
+                      .map((reg) => (
+                        <tr key={reg.id} className="hover:bg-slate-50/70">
+                          <td className="p-2.5 pl-4 font-mono font-bold text-amber-700">{reg.applicationId}</td>
+                          <td className="p-2.5 font-bold text-gray-900">
+                            {reg.studentName}
+                            {reg.assignedRollNo && (
+                              <span className="block text-[10px] font-mono text-indigo-700">রোল: {reg.assignedRollNo}</span>
+                            )}
+                          </td>
+                          <td className="p-2.5 text-gray-700">
+                            <span>{reg.guardianName || "—"}</span>
+                            <span className="block text-[10px] font-mono text-gray-500">{reg.phone}</span>
+                          </td>
+                          <td className="p-2.5 font-bold text-indigo-950">{reg.classLevel}</td>
+                          <td className="p-2.5 text-gray-600 text-[11px]">
+                            <span>{reg.schoolName}</span>
+                            <span className="block text-[10px] text-gray-400">{reg.village || reg.district}</span>
+                          </td>
+                          <td className="p-2.5 text-center">
+                            <span className={`inline-block px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase ${
+                              reg.status === "approved" ? "bg-emerald-100 text-emerald-800" :
+                              reg.status === "rejected" ? "bg-rose-100 text-rose-800" :
+                              "bg-amber-100 text-amber-800 animate-pulse"
+                            }`}>
+                              {reg.status === "approved" ? "অনুমোদিত" : reg.status === "rejected" ? "বাতিল" : "বিচারাধীন"}
+                            </span>
+                          </td>
+                          <td className="p-2.5 pr-4 text-center">
+                            <div className="flex items-center justify-center gap-1.5 flex-wrap">
+                              {reg.status !== "approved" && (
+                                <button
+                                  onClick={() => handleConvertToResult(reg.id, reg.studentName)}
+                                  className="p-1 px-2 text-[9.5px] font-black bg-emerald-600 hover:bg-emerald-700 text-white rounded shadow-sm flex items-center gap-1"
+                                  title="Approve and create roll number + admit card"
+                                >
+                                  <UserCheck className="w-3 h-3" /> অনুমোদন ও রোল দিন
+                                </button>
+                              )}
+                              {reg.status === "pending" && (
+                                <button
+                                  onClick={() => handleUpdateRegistrationStatus(reg.id, "rejected")}
+                                  className="p-1 px-2 text-[9.5px] font-bold bg-gray-100 hover:bg-rose-50 text-rose-700 rounded border border-rose-200"
+                                >
+                                  বাতিল
+                                </button>
+                              )}
+                              <button
+                                onClick={() => handleDeleteRegistration(reg.id, reg.studentName)}
+                                className="p-1 px-1.5 text-[9.5px] font-bold bg-rose-50 text-rose-700 rounded hover:bg-rose-100"
+                                title="Delete application"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* -------------------------------------------
+          SUB-TAB: AI CHATBOT & FAQ KNOWLEDGE BASE
+          ------------------------------------------- */}
+      {activeSubTab === "ai_chatbot" && (
+        <form onSubmit={handleSaveChatbotSettings} className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-6 text-left animate-fade-in">
+          <div className="border-b pb-4 flex items-center justify-between flex-wrap gap-2">
+            <div>
+              <h3 className="font-extrabold text-indigo-950 text-sm flex items-center gap-2">
+                <Bot className="w-5 h-5 text-amber-500" />
+                <span>এআই চ্যাটবট ও নলেজ বেস সেটিংস (AI Chatbot & FAQs)</span>
+              </h3>
+              <p className="text-xs text-gray-500 mt-1">
+                চ্যাটবটের স্বাগতম বার্তা, গুগল জেমিনি এআই প্রম্পট নির্দেশাবলী এবং ঘন ঘন জিজ্ঞাসিত প্রশ্নাবলী (FAQ) পরিচালনা করুন।
+              </p>
+            </div>
+            <button
+              type="submit"
+              className="px-5 py-2 bg-amber-500 hover:bg-amber-600 text-indigo-950 font-black text-xs rounded-xl shadow transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
+            >
+              <Save className="w-4 h-4" />
+              <span>চ্যাটবট সেটিংস সংরক্ষণ করুন (Save Settings)</span>
+            </button>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-xs font-bold text-gray-700 mb-1">
+                চ্যাটবটের প্রারম্ভিক বার্তা (Welcome Greeting in Bengali)
+              </label>
+              <textarea
+                rows={2}
+                value={chatbotConfig.welcomeMessageBn || ""}
+                onChange={(e) => setChatbotConfig({ ...chatbotConfig, welcomeMessageBn: e.target.value })}
+                placeholder="নমস্কার! মেধা অন্বেষা ২০২৬ পোর্টালে আপনাকে স্বাগতম..."
+                className="w-full p-3 border rounded-xl text-xs bg-slate-50 focus:bg-white"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-gray-700 mb-1">
+                AI সিস্টেম প্রম্পট ও নলেজ বেস নির্দেশাবলী (System Prompt)
+              </label>
+              <textarea
+                rows={4}
+                value={chatbotConfig.systemPrompt || ""}
+                onChange={(e) => setChatbotConfig({ ...chatbotConfig, systemPrompt: e.target.value })}
+                placeholder="You are the helpful AI assistant for Medha Anwesha 2026..."
+                className="w-full p-3 border rounded-xl text-xs font-mono bg-slate-50 focus:bg-white leading-relaxed"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-gray-700 mb-1">
+                Google Gemini API Key (ঐচ্ছিক / Optional)
+              </label>
+              <input
+                type="password"
+                value={chatbotConfig.geminiApiKey || ""}
+                onChange={(e) => setChatbotConfig({ ...chatbotConfig, geminiApiKey: e.target.value })}
+                placeholder="AIzaSy..."
+                className="w-full px-3 py-2 border rounded-xl text-xs font-mono bg-slate-50 focus:bg-white"
+              />
+              <span className="text-[10px] text-gray-400 mt-1 block">API Key ফাঁকা থাকলে অফলাইন ইন্টেলিজেন্ট উত্তর ব্যবস্থা স্বয়ংক্রিয়ভাবে কাজ করবে।</span>
+            </div>
+
+            <div className="border-t pt-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <h4 className="font-extrabold text-xs text-indigo-950 uppercase tracking-wider">
+                  সাধারণ প্রশ্ন ও উত্তর (Frequently Asked Questions - FAQs)
+                </h4>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const existingFaqs = chatbotConfig.faqList || [];
+                    setChatbotConfig({
+                      ...chatbotConfig,
+                      faqList: [...existingFaqs, { q: "নতুন প্রশ্ন?", a: "নতুন উত্তর..." }]
+                    });
+                  }}
+                  className="px-3 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-900 font-bold text-xs rounded-lg flex items-center gap-1 cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5" /> FAQ যোগ করুন
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                {(chatbotConfig.faqList || []).map((faq, fIdx) => (
+                  <div key={fIdx} className="p-4 rounded-xl border border-gray-200 bg-slate-50/50 space-y-2 relative">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-black text-amber-700 font-mono">FAQ #{fIdx + 1}</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updated = (chatbotConfig.faqList || []).filter((_, idx) => idx !== fIdx);
+                          setChatbotConfig({ ...chatbotConfig, faqList: updated });
+                        }}
+                        className="text-rose-600 hover:text-rose-800 text-[10px] font-bold p-1"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="প্রশ্ন..."
+                      value={faq.q}
+                      onChange={(e) => {
+                        const updated = [...(chatbotConfig.faqList || [])];
+                        updated[fIdx] = { ...updated[fIdx], q: e.target.value };
+                        setChatbotConfig({ ...chatbotConfig, faqList: updated });
+                      }}
+                      className="w-full px-3 py-1.5 border rounded-lg text-xs bg-white font-bold"
+                    />
+                    <textarea
+                      rows={2}
+                      placeholder="উত্তর..."
+                      value={faq.a}
+                      onChange={(e) => {
+                        const updated = [...(chatbotConfig.faqList || [])];
+                        updated[fIdx] = { ...updated[fIdx], a: e.target.value };
+                        setChatbotConfig({ ...chatbotConfig, faqList: updated });
+                      }}
+                      className="w-full px-3 py-1.5 border rounded-lg text-xs bg-white"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </form>
       )}
 
       {/* -------------------------------------------

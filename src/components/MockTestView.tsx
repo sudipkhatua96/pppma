@@ -6,6 +6,7 @@ import { DEFAULT_MOCK_QUESTIONS, MockQuestion } from "../mockData";
 export default function MockTestView() {
   const [selectedClass, setSelectedClass] = useState<string>("Class V");
   const [testState, setTestState] = useState<"intro" | "active" | "completed">("intro");
+  const [allBankQuestions, setAllBankQuestions] = useState<MockQuestion[]>(DEFAULT_MOCK_QUESTIONS);
   
   const [questions, setQuestions] = useState<MockQuestion[]>([]);
   const [currentIdx, setCurrentIdx] = useState<number>(0);
@@ -15,12 +16,35 @@ export default function MockTestView() {
 
   const classes = ["Class I", "Class II", "Class III", "Class IV", "Class V", "Class VI", "Class VII", "Class VIII", "Class IX", "Class X"];
 
+  // Fetch dynamic questions from backend database API on mount
+  useEffect(() => {
+    const fetchQuestions = async () => {
+      try {
+        const res = await fetch("/api/mock-questions");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && Array.isArray(data.questions) && data.questions.length > 0) {
+            setAllBankQuestions(data.questions);
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn("Could not fetch remote mock questions, using default bank.", err);
+      }
+      const saved = localStorage.getItem("medha_mock_questions");
+      if (saved) {
+        try { setAllBankQuestions(JSON.parse(saved)); } catch(e) {}
+      }
+    };
+    fetchQuestions();
+  }, []);
+
   // Filter or randomize questions for selected class
   const startTest = () => {
     // Get questions matching selected class, or fallback to general questions
-    let classQuestions = DEFAULT_MOCK_QUESTIONS.filter(q => q.classLevel === selectedClass);
+    let classQuestions = allBankQuestions.filter(q => q.classLevel === selectedClass);
     if (classQuestions.length < 5) {
-      classQuestions = [...classQuestions, ...DEFAULT_MOCK_QUESTIONS.filter(q => q.classLevel !== selectedClass)];
+      classQuestions = [...classQuestions, ...allBankQuestions.filter(q => q.classLevel !== selectedClass)];
     }
     // Shuffle questions
     const shuffled = [...classQuestions].sort(() => 0.5 - Math.random()).slice(0, 10);

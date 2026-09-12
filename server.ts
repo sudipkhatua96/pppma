@@ -8,6 +8,7 @@ import * as XLSX from "xlsx";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import Database from "better-sqlite3";
+import { DEFAULT_MOCK_QUESTIONS, DEFAULT_HALL_OF_FAME, DEFAULT_ADMIT_CARDS } from "./src/mockData";
 
 dotenv.config();
 
@@ -126,6 +127,80 @@ dbConnection.prepare(`
     account_role TEXT,
     action_performed TEXT,
     device_info TEXT
+  )
+`).run();
+
+// Initialize tables for full admin control of website modules
+dbConnection.prepare(`
+  CREATE TABLE IF NOT EXISTS mock_questions (
+    id TEXT PRIMARY KEY,
+    class_level TEXT,
+    subject TEXT,
+    question_bn TEXT,
+    options TEXT,
+    correct_index INTEGER,
+    explanation_bn TEXT
+  )
+`).run();
+
+dbConnection.prepare(`
+  CREATE TABLE IF NOT EXISTS admit_cards (
+    roll_no TEXT PRIMARY KEY,
+    name TEXT,
+    guardian_name TEXT,
+    class_level TEXT,
+    school TEXT,
+    center_name TEXT,
+    center_address TEXT,
+    room_no TEXT,
+    seat_no TEXT,
+    exam_date TEXT,
+    reporting_time TEXT,
+    exam_time TEXT
+  )
+`).run();
+
+dbConnection.prepare(`
+  CREATE TABLE IF NOT EXISTS hall_of_fame (
+    id TEXT PRIMARY KEY,
+    name TEXT,
+    year INTEGER,
+    class_level TEXT,
+    rank INTEGER,
+    score INTEGER,
+    max_score INTEGER,
+    school TEXT,
+    trophy_type TEXT,
+    quote_bn TEXT,
+    achievement_badge TEXT
+  )
+`).run();
+
+dbConnection.prepare(`
+  CREATE TABLE IF NOT EXISTS candidate_registrations (
+    id TEXT PRIMARY KEY,
+    application_id TEXT,
+    student_name TEXT,
+    guardian_name TEXT,
+    phone TEXT,
+    email TEXT,
+    dob TEXT,
+    gender TEXT,
+    school_name TEXT,
+    class_level TEXT,
+    village TEXT,
+    post_office TEXT,
+    district TEXT,
+    status TEXT DEFAULT 'pending',
+    applied_at TEXT,
+    assigned_roll_no TEXT
+  )
+`).run();
+
+dbConnection.prepare(`
+  CREATE TABLE IF NOT EXISTS chatbot_settings (
+    key TEXT PRIMARY KEY,
+    value TEXT
   )
 `).run();
 
@@ -305,6 +380,11 @@ interface DBStructure {
   feedbacks: any[];
   activity_logs: any[];
   system_status?: { is_result_live: number };
+  mockQuestions?: any[];
+  hallOfFame?: any[];
+  admitCards?: any[];
+  registrations?: any[];
+  chatbotSettings?: any;
 }
 
 // Active admin session cache
@@ -353,6 +433,17 @@ function scaleDownResultsIfNeeded(results: any[]): { results: any[], updated: bo
   return { results: cleaned, updated: true };
 }
 
+// Default Chatbot Config
+const DEFAULT_CHATBOT_CONFIG = {
+  welcomeMessageBn: "নমস্কার! মেধা অন্বেষা ২০২৬ পোর্টালে আপনাকে স্বাগতম। আমি আপনার ভার্চুয়াল সহকারী।",
+  systemPrompt: "You are the helpful, encouraging AI assistant for Medha Anwesha 2026 talent search exam.",
+  faqList: [
+    { q: "পরীক্ষার তারিখ কখন?", a: "আগামী রবিবার, ২৯শে নভেম্বর, ২০২৬ সকাল ১১:০০ টা থেকে দুপুর ১:০০ টা পর্যন্ত।" },
+    { q: "এডমিট কার্ড কীভাবে পাব?", a: "ওয়েবসাইটের 'এডমিট কার্ড' বাটনে ক্লিক করে রোল নম্বর বা নাম লিখে ডাউনলোড করুন।" },
+    { q: "মক টেস্ট কীভাবে দেব?", a: "ওয়েবসাইটের 'মক টেস্ট' ট্যাবে গিয়ে যেকোনো ক্লাসের ১০ নম্বরের MCQ অনুশীলন করুন।" }
+  ]
+};
+
 // Load database
 function loadDB(): DBStructure {
   let settingsFromMeta = {};
@@ -382,7 +473,12 @@ function loadDB(): DBStructure {
         users: parsed.users || defaultUsers,
         feedbacks: parsed.feedbacks || [],
         activity_logs: parsed.activity_logs || [],
-        system_status: parsed.system_status || { is_result_live: 0 }
+        system_status: parsed.system_status || { is_result_live: 0 },
+        mockQuestions: parsed.mockQuestions || DEFAULT_MOCK_QUESTIONS,
+        hallOfFame: parsed.hallOfFame || DEFAULT_HALL_OF_FAME,
+        admitCards: parsed.admitCards || Object.values(DEFAULT_ADMIT_CARDS),
+        registrations: parsed.registrations || [],
+        chatbotSettings: parsed.chatbotSettings || DEFAULT_CHATBOT_CONFIG
       };
 
       // Sync state from SQLite system_status table
@@ -434,7 +530,12 @@ function loadDB(): DBStructure {
         users: parsed.users || defaultUsers,
         feedbacks: parsed.feedbacks || [],
         activity_logs: parsed.activity_logs || [],
-        system_status: parsed.system_status || { is_result_live: 0 }
+        system_status: parsed.system_status || { is_result_live: 0 },
+        mockQuestions: parsed.mockQuestions || DEFAULT_MOCK_QUESTIONS,
+        hallOfFame: parsed.hallOfFame || DEFAULT_HALL_OF_FAME,
+        admitCards: parsed.admitCards || Object.values(DEFAULT_ADMIT_CARDS),
+        registrations: parsed.registrations || [],
+        chatbotSettings: parsed.chatbotSettings || DEFAULT_CHATBOT_CONFIG
       };
 
       const scaleResult = scaleDownResultsIfNeeded(dbObj.results);
@@ -463,7 +564,12 @@ function loadDB(): DBStructure {
     users: defaultUsers,
     feedbacks: [],
     activity_logs: [],
-    system_status: { is_result_live: 0 }
+    system_status: { is_result_live: 0 },
+    mockQuestions: DEFAULT_MOCK_QUESTIONS,
+    hallOfFame: DEFAULT_HALL_OF_FAME,
+    admitCards: Object.values(DEFAULT_ADMIT_CARDS),
+    registrations: [],
+    chatbotSettings: DEFAULT_CHATBOT_CONFIG
   };
 
   initial.users.forEach((u: any) => {
@@ -1674,6 +1780,450 @@ app.delete("/api/archives/:id", verifyAdmin, (req, res) => {
   logAudit(actor.name, getRoleLabel(actor.role), `আর্কাইভ/নোটিশ ডিলিট করা হয়েছে - শিরোনাম: ${title} / Deleted notice/archive - Title: ${title}`, req);
   saveDB(db);
   res.json({ success: true, archives: db.archives });
+});
+
+// ==========================================
+// 1. MOCK TEST QUESTION BANK REST API
+// ==========================================
+
+// Public GET: Fetch mock questions (optional filter by classLevel / subject)
+app.get("/api/mock-questions", (req, res) => {
+  const db = loadDB();
+  let questions = db.mockQuestions || DEFAULT_MOCK_QUESTIONS;
+  const { classLevel, subject } = req.query;
+
+  if (classLevel && typeof classLevel === "string" && classLevel !== "All") {
+    questions = questions.filter(q => q.classLevel === classLevel);
+  }
+  if (subject && typeof subject === "string" && subject !== "All") {
+    questions = questions.filter(q => q.subject === subject);
+  }
+
+  res.json({ success: true, questions });
+});
+
+// Admin POST: Add new Mock Question
+app.post("/api/admin/mock-questions", verifyAdmin, (req, res) => {
+  const actor = (req as any).adminUser;
+  const { classLevel, subject, questionBn, options, correctIndex, explanationBn } = req.body;
+
+  if (!questionBn || !options || !Array.isArray(options) || options.length < 4) {
+    return res.status(400).json({ success: false, message: "প্রশ্ন ও ৪টি বিকল্প আবশ্যক।" });
+  }
+
+  const db = loadDB();
+  if (!db.mockQuestions) db.mockQuestions = [...DEFAULT_MOCK_QUESTIONS];
+
+  const newQuestion = {
+    id: `mq-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+    classLevel: classLevel || "Class V",
+    subject: subject || "Bengali",
+    questionBn,
+    options: options.slice(0, 4),
+    correctIndex: Number(correctIndex) || 0,
+    explanationBn: explanationBn || ""
+  };
+
+  db.mockQuestions.unshift(newQuestion);
+  logAudit(actor.name, getRoleLabel(actor.role), `মক টেস্টের নতুন প্রশ্ন যুক্ত করা হয়েছে (${newQuestion.classLevel} - ${newQuestion.subject})`, req);
+  saveDB(db);
+  res.json({ success: true, questions: db.mockQuestions, message: "প্রশ্ন সফলভাবে যুক্ত হয়েছে।" });
+});
+
+// Admin PUT: Update existing Mock Question
+app.put("/api/admin/mock-questions/:id", verifyAdmin, (req, res) => {
+  const actor = (req as any).adminUser;
+  const id = req.params.id;
+  const { classLevel, subject, questionBn, options, correctIndex, explanationBn } = req.body;
+
+  const db = loadDB();
+  if (!db.mockQuestions) db.mockQuestions = [...DEFAULT_MOCK_QUESTIONS];
+
+  const index = db.mockQuestions.findIndex(q => q.id === id);
+  if (index === -1) {
+    return res.status(404).json({ success: false, message: "প্রশ্নটি পাওয়া যায়নি।" });
+  }
+
+  db.mockQuestions[index] = {
+    ...db.mockQuestions[index],
+    classLevel: classLevel || db.mockQuestions[index].classLevel,
+    subject: subject || db.mockQuestions[index].subject,
+    questionBn: questionBn || db.mockQuestions[index].questionBn,
+    options: Array.isArray(options) ? options.slice(0, 4) : db.mockQuestions[index].options,
+    correctIndex: correctIndex !== undefined ? Number(correctIndex) : db.mockQuestions[index].correctIndex,
+    explanationBn: explanationBn !== undefined ? explanationBn : db.mockQuestions[index].explanationBn
+  };
+
+  logAudit(actor.name, getRoleLabel(actor.role), `মক টেস্ট প্রশ্ন আপডেট করা হয়েছে (ID: ${id})`, req);
+  saveDB(db);
+  res.json({ success: true, questions: db.mockQuestions, message: "প্রশ্ন সফলভাবে আপডেট হয়েছে।" });
+});
+
+// Admin DELETE: Delete Mock Question
+app.delete("/api/admin/mock-questions/:id", verifyAdmin, (req, res) => {
+  const actor = (req as any).adminUser;
+  const id = req.params.id;
+
+  const db = loadDB();
+  if (!db.mockQuestions) db.mockQuestions = [...DEFAULT_MOCK_QUESTIONS];
+
+  db.mockQuestions = db.mockQuestions.filter(q => q.id !== id);
+  logAudit(actor.name, getRoleLabel(actor.role), `মক টেস্ট প্রশ্ন মুছে ফেলা হয়েছে (ID: ${id})`, req);
+  saveDB(db);
+  res.json({ success: true, questions: db.mockQuestions, message: "প্রশ্ন মুছে ফেলা হয়েছে।" });
+});
+
+// ==========================================
+// 2. ADMIT CARDS & VENUE REST API
+// ==========================================
+
+// Public GET: Search or list Admit Cards
+app.get("/api/admit-cards", (req, res) => {
+  const db = loadDB();
+  const admitCards = db.admitCards || Object.values(DEFAULT_ADMIT_CARDS);
+  const q = (req.query.q || req.query.rollNo || "").toString().trim().toLowerCase();
+
+  if (q) {
+    const matched = admitCards.filter((card: any) =>
+      card.rollNo?.toLowerCase().includes(q) ||
+      card.name?.toLowerCase().includes(q) ||
+      card.school?.toLowerCase().includes(q)
+    );
+    return res.json({ success: true, admitCards: matched });
+  }
+
+  res.json({ success: true, admitCards });
+});
+
+// Admin POST: Add/Upsert Admit Card
+app.post("/api/admin/admit-cards", verifyAdmin, (req, res) => {
+  const actor = (req as any).adminUser;
+  const { rollNo, name, guardianName, classLevel, school, centerName, centerAddress, roomNo, seatNo, examDate, reportingTime, examTime } = req.body;
+
+  if (!rollNo || !name) {
+    return res.status(400).json({ success: false, message: "রোল নম্বর ও পরীক্ষার্থীর নাম আবশ্যক।" });
+  }
+
+  const db = loadDB();
+  if (!db.admitCards) db.admitCards = Object.values(DEFAULT_ADMIT_CARDS);
+
+  const newCard = {
+    rollNo: rollNo.trim().toUpperCase(),
+    name: name.trim(),
+    guardianName: guardianName || "",
+    classLevel: classLevel || "Class V",
+    school: school || "",
+    centerName: centerName || "Mayapur High School Center",
+    centerAddress: centerAddress || "Mayapur, Hooghly, West Bengal - 712413",
+    roomNo: roomNo || "Room No. 01",
+    seatNo: seatNo || "Bench A-01",
+    examDate: examDate || db.settings?.examDate || "রবিবার, ২৯শে নভেম্বর, ২০২৬",
+    reportingTime: reportingTime || "সকাল ১০:৩০ টা",
+    examTime: examTime || "সকাল ১১:০০ টা - দুপুর ১:০০ টা"
+  };
+
+  const existingIndex = db.admitCards.findIndex((c: any) => c.rollNo.toUpperCase() === newCard.rollNo);
+  if (existingIndex >= 0) {
+    db.admitCards[existingIndex] = { ...db.admitCards[existingIndex], ...newCard };
+  } else {
+    db.admitCards.unshift(newCard);
+  }
+
+  logAudit(actor.name, getRoleLabel(actor.role), `এডমিট কার্ড আপডেট/যুক্ত করা হয়েছে (রোল: ${newCard.rollNo}, নাম: ${newCard.name})`, req);
+  saveDB(db);
+  res.json({ success: true, admitCards: db.admitCards, message: "এডমিট কার্ড সফলভাবে সংরক্ষিত হয়েছে।" });
+});
+
+// Admin PUT: Update Admit Card by rollNo
+app.put("/api/admin/admit-cards/:rollNo", verifyAdmin, (req, res) => {
+  const actor = (req as any).adminUser;
+  const rollNo = req.params.rollNo.toUpperCase();
+
+  const db = loadDB();
+  if (!db.admitCards) db.admitCards = Object.values(DEFAULT_ADMIT_CARDS);
+
+  const index = db.admitCards.findIndex((c: any) => c.rollNo.toUpperCase() === rollNo);
+  if (index === -1) {
+    return res.status(404).json({ success: false, message: "এডমিট কার্ড পাওয়া যায়নি।" });
+  }
+
+  db.admitCards[index] = { ...db.admitCards[index], ...req.body, rollNo };
+  logAudit(actor.name, getRoleLabel(actor.role), `এডমিট কার্ড বিবরণ আপডেট করা হয়েছে (রোল: ${rollNo})`, req);
+  saveDB(db);
+  res.json({ success: true, admitCards: db.admitCards, message: "এডমিট কার্ড আপডেট হয়েছে।" });
+});
+
+// Admin DELETE: Delete Admit Card
+app.delete("/api/admin/admit-cards/:rollNo", verifyAdmin, (req, res) => {
+  const actor = (req as any).adminUser;
+  const rollNo = req.params.rollNo.toUpperCase();
+
+  const db = loadDB();
+  if (!db.admitCards) db.admitCards = Object.values(DEFAULT_ADMIT_CARDS);
+
+  db.admitCards = db.admitCards.filter((c: any) => c.rollNo.toUpperCase() !== rollNo);
+  logAudit(actor.name, getRoleLabel(actor.role), `এডমিট কার্ড মুছে ফেলা হয়েছে (রোল: ${rollNo})`, req);
+  saveDB(db);
+  res.json({ success: true, admitCards: db.admitCards, message: "এডমিট কার্ড মুছে ফেলা হয়েছে।" });
+});
+
+// ==========================================
+// 3. HALL OF FAME TOPPERS REST API
+// ==========================================
+
+// Public GET: Fetch Hall of Fame toppers
+app.get("/api/hall-of-fame", (req, res) => {
+  const db = loadDB();
+  const toppers = db.hallOfFame || DEFAULT_HALL_OF_FAME;
+  res.json({ success: true, toppers });
+});
+
+// Admin POST: Add Topper to Hall of Fame
+app.post("/api/admin/hall-of-fame", verifyAdmin, (req, res) => {
+  const actor = (req as any).adminUser;
+  const { name, year, classLevel, rank, score, maxScore, school, trophyType, quoteBn, achievementBadge } = req.body;
+
+  if (!name || !school) {
+    return res.status(400).json({ success: false, message: "টপারের নাম ও স্কুলের নাম আবশ্যক।" });
+  }
+
+  const db = loadDB();
+  if (!db.hallOfFame) db.hallOfFame = [...DEFAULT_HALL_OF_FAME];
+
+  const newTopper = {
+    id: `hof-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+    name: name.trim(),
+    year: Number(year) || 2026,
+    classLevel: classLevel || "Class VIII",
+    rank: (Number(rank) === 2 ? 2 : Number(rank) === 3 ? 3 : 1) as (1 | 2 | 3),
+    score: Number(score) || 48,
+    maxScore: Number(maxScore) || 50,
+    school: school.trim(),
+    trophyType: (trophyType === "silver" ? "silver" : trophyType === "bronze" ? "bronze" : "gold") as ("gold" | "silver" | "bronze"),
+    quoteBn: quoteBn || "নিয়মিত অধ্যয়ন ও অধ্যাবসায়ই সাফল্যের চাবিকাঠি।",
+    achievementBadge: achievementBadge || "Star Scholar"
+  };
+
+  db.hallOfFame.unshift(newTopper);
+  logAudit(actor.name, getRoleLabel(actor.role), `হল অফ ফেমে নতুন টপার যুক্ত করা হয়েছে (${newTopper.name}, Rank: ${newTopper.rank})`, req);
+  saveDB(db);
+  res.json({ success: true, toppers: db.hallOfFame, message: "হল অফ ফেমে টপার যুক্ত হয়েছে।" });
+});
+
+// Admin PUT: Update Topper
+app.put("/api/admin/hall-of-fame/:id", verifyAdmin, (req, res) => {
+  const actor = (req as any).adminUser;
+  const id = req.params.id;
+
+  const db = loadDB();
+  if (!db.hallOfFame) db.hallOfFame = [...DEFAULT_HALL_OF_FAME];
+
+  const index = db.hallOfFame.findIndex(t => t.id === id);
+  if (index === -1) {
+    return res.status(404).json({ success: false, message: "টপার রেকর্ড পাওয়া যায়নি।" });
+  }
+
+  db.hallOfFame[index] = { ...db.hallOfFame[index], ...req.body };
+  logAudit(actor.name, getRoleLabel(actor.role), `হল অফ ফেম টপার রেকর্ড আপডেট করা হয়েছে (ID: ${id})`, req);
+  saveDB(db);
+  res.json({ success: true, toppers: db.hallOfFame, message: "টপার রেকর্ড আপডেট হয়েছে।" });
+});
+
+// Admin DELETE: Delete Topper
+app.delete("/api/admin/hall-of-fame/:id", verifyAdmin, (req, res) => {
+  const actor = (req as any).adminUser;
+  const id = req.params.id;
+
+  const db = loadDB();
+  if (!db.hallOfFame) db.hallOfFame = [...DEFAULT_HALL_OF_FAME];
+
+  db.hallOfFame = db.hallOfFame.filter(t => t.id !== id);
+  logAudit(actor.name, getRoleLabel(actor.role), `হল অফ ফেম থেকে টপার মুছে ফেলা হয়েছে (ID: ${id})`, req);
+  saveDB(db);
+  res.json({ success: true, toppers: db.hallOfFame, message: "টপার রেকর্ড মুছে ফেলা হয়েছে।" });
+});
+
+// ==========================================
+// 4. CANDIDATE PRE-REGISTRATION REST API
+// ==========================================
+
+// Public POST: Submit candidate application
+app.post("/api/registrations", (req, res) => {
+  const { studentName, guardianName, phone, email, dob, gender, schoolName, classLevel, village, postOffice, district } = req.body;
+
+  if (!studentName || !phone || !schoolName || !classLevel) {
+    return res.status(400).json({ success: false, message: "নাম, ফোন নম্বর, স্কুলের নাম এবং ক্লাস আবশ্যক।" });
+  }
+
+  const db = loadDB();
+  if (!db.registrations) db.registrations = [];
+
+  const randomDigits = Math.floor(100000 + Math.random() * 900000);
+  const newReg = {
+    id: `reg-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+    applicationId: `APP-2026-${randomDigits}`,
+    studentName: studentName.trim(),
+    guardianName: guardianName ? guardianName.trim() : "",
+    phone: phone.trim(),
+    email: email ? email.trim() : "",
+    dob: dob || "",
+    gender: gender || "Other",
+    schoolName: schoolName.trim(),
+    classLevel: classLevel || "Class V",
+    village: village ? village.trim() : "",
+    postOffice: postOffice ? postOffice.trim() : "",
+    district: district ? district.trim() : "Hooghly",
+    status: "pending" as const,
+    appliedAt: new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })
+  };
+
+  db.registrations.unshift(newReg);
+  saveDB(db);
+  res.json({
+    success: true,
+    application: newReg,
+    message: "আপনার আবেদন সফলভাবে জমা পড়েছে! অ্যাপ্লিকেশন স্লিপটি সংরক্ষণ করুন।"
+  });
+});
+
+// Admin GET: List all candidate registrations
+app.get("/api/admin/registrations", verifyAdmin, (req, res) => {
+  const db = loadDB();
+  res.json({ success: true, registrations: db.registrations || [] });
+});
+
+// Admin PATCH: Update registration status
+app.patch("/api/admin/registrations/:id/status", verifyAdmin, (req, res) => {
+  const actor = (req as any).adminUser;
+  const id = req.params.id;
+  const { status } = req.body;
+
+  const db = loadDB();
+  if (!db.registrations) db.registrations = [];
+
+  const reg = db.registrations.find(r => r.id === id);
+  if (!reg) {
+    return res.status(404).json({ success: false, message: "আবেদনপত্র পাওয়া যায়নি।" });
+  }
+
+  reg.status = status;
+  logAudit(actor.name, getRoleLabel(actor.role), `আবেদনের স্ট্যাটাস পরিবর্তন: ${reg.studentName} (${status})`, req);
+  saveDB(db);
+  res.json({ success: true, registrations: db.registrations, message: "আবেদনের স্ট্যাটাস আপডেট হয়েছে।" });
+});
+
+// Admin POST: Convert approved registration into official Student Result & Admit Card
+app.post("/api/admin/registrations/:id/convert-to-result", verifyAdmin, (req, res) => {
+  const actor = (req as any).adminUser;
+  const id = req.params.id;
+
+  const db = loadDB();
+  if (!db.registrations) db.registrations = [];
+  if (!db.results) db.results = DEFAULT_RESULTS;
+  if (!db.admitCards) db.admitCards = Object.values(DEFAULT_ADMIT_CARDS);
+
+  const reg = db.registrations.find(r => r.id === id);
+  if (!reg) {
+    return res.status(404).json({ success: false, message: "আবেদনপত্র পাওয়া যায়নি।" });
+  }
+
+  // Generate roll number based on class
+  const classNumMap: Record<string, string> = {
+    "Class I": "100", "Class II": "200", "Class III": "300", "Class IV": "400",
+    "Class V": "500", "Class VI": "600", "Class VII": "700", "Class VIII": "800",
+    "Class IX": "900", "Class X": "1000"
+  };
+  const baseNum = parseInt(classNumMap[reg.classLevel] || "500", 10);
+  const countInClass = db.results.filter(r => r.classLevel === reg.classLevel).length;
+  const assignedRollNo = `MA-2026-${baseNum + countInClass + 1}`;
+
+  // Add Student Result record
+  const newResult: StudentResult = {
+    id: `res-${Date.now()}`,
+    rollNo: assignedRollNo,
+    name: reg.studentName,
+    school: reg.schoolName,
+    classLevel: reg.classLevel,
+    marks: 0,
+    rank: 999,
+    status: "Passed",
+    phone: reg.phone
+  };
+  db.results.push(newResult);
+
+  // Add Admit Card record
+  const newAdmitCard = {
+    rollNo: assignedRollNo,
+    name: reg.studentName,
+    guardianName: reg.guardianName || "",
+    classLevel: reg.classLevel,
+    school: reg.schoolName,
+    centerName: `${reg.schoolName} Center`,
+    centerAddress: `${reg.village || "Mayapur"}, ${reg.district || "Hooghly"}, West Bengal`,
+    roomNo: "Room No. 01",
+    seatNo: `Bench ${String.fromCharCode(65 + (countInClass % 4))}-${(countInClass % 20) + 1}`,
+    examDate: db.settings?.examDate || "রবিবার, ২৯শে নভেম্বর, ২০২৬",
+    reportingTime: "সকাল ১০:৩০ টা",
+    examTime: "সকাল ১১:০০ টা - দুপুর ১:০০ টা"
+  };
+  db.admitCards.push(newAdmitCard);
+
+  reg.status = "approved";
+  reg.assignedRollNo = assignedRollNo;
+
+  logAudit(actor.name, getRoleLabel(actor.role), `আবেদনকারীকে রোল নম্বর দিয়ে তালিকাভুক্ত করা হয়েছে (${reg.studentName} -> ${assignedRollNo})`, req);
+  saveDB(db);
+
+  res.json({
+    success: true,
+    message: `আবেদনকারী সফলভাবে অনুমোদিত হয়েছে! রোল নম্বর: ${assignedRollNo}`,
+    assignedRollNo,
+    registrations: db.registrations,
+    results: db.results,
+    admitCards: db.admitCards
+  });
+});
+
+// Admin DELETE: Delete registration
+app.delete("/api/admin/registrations/:id", verifyAdmin, (req, res) => {
+  const actor = (req as any).adminUser;
+  const id = req.params.id;
+
+  const db = loadDB();
+  if (!db.registrations) db.registrations = [];
+
+  db.registrations = db.registrations.filter(r => r.id !== id);
+  logAudit(actor.name, getRoleLabel(actor.role), `আবেদনপত্র মুছে ফেলা হয়েছে (ID: ${id})`, req);
+  saveDB(db);
+  res.json({ success: true, registrations: db.registrations, message: "আবেদনপত্র মুছে ফেলা হয়েছে।" });
+});
+
+// ==========================================
+// 5. CHATBOT SETTINGS & FAQS REST API
+// ==========================================
+
+// Public GET: Chatbot configuration
+app.get("/api/chatbot-settings", (req, res) => {
+  const db = loadDB();
+  res.json({ success: true, settings: db.chatbotSettings || DEFAULT_CHATBOT_CONFIG });
+});
+
+// Admin POST: Save Chatbot configuration
+app.post("/api/admin/chatbot-settings", verifyAdmin, (req, res) => {
+  const actor = (req as any).adminUser;
+  const { welcomeMessageBn, systemPrompt, geminiApiKey, faqList } = req.body;
+
+  const db = loadDB();
+  db.chatbotSettings = {
+    welcomeMessageBn: welcomeMessageBn || DEFAULT_CHATBOT_CONFIG.welcomeMessageBn,
+    systemPrompt: systemPrompt || DEFAULT_CHATBOT_CONFIG.systemPrompt,
+    geminiApiKey: geminiApiKey || "",
+    faqList: Array.isArray(faqList) ? faqList : DEFAULT_CHATBOT_CONFIG.faqList
+  };
+
+  logAudit(actor.name, getRoleLabel(actor.role), `এআই চ্যাটবট ও এফএকিউ সেটিংস আপডেট করা হয়েছে`, req);
+  saveDB(db);
+  res.json({ success: true, settings: db.chatbotSettings, message: "চ্যাটবট সেটিংস সফলভাবে সংরক্ষিত হয়েছে।" });
 });
 
 // Testimonials / Student Success Stories

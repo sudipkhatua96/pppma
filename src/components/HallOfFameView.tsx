@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { Trophy, Award, Medal, Sparkles, Star, Search, Filter, Quote, School, CheckCircle2, ChevronRight } from "lucide-react";
 import { DEFAULT_HALL_OF_FAME, DEFAULT_TESTIMONIALS, HallOfFameMember } from "../mockData";
@@ -7,10 +7,33 @@ export default function HallOfFameView() {
   const [selectedYear, setSelectedYear] = useState<number>(2025);
   const [selectedClass, setSelectedClass] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [members, setMembers] = useState<HallOfFameMember[]>(DEFAULT_HALL_OF_FAME);
+
+  useEffect(() => {
+    const fetchToppers = async () => {
+      try {
+        const res = await fetch("/api/hall-of-fame");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && Array.isArray(data.toppers) && data.toppers.length > 0) {
+            setMembers(data.toppers);
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn("Could not fetch remote hall of fame, using default dataset.", err);
+      }
+      const saved = localStorage.getItem("medha_hall_of_fame");
+      if (saved) {
+        try { setMembers(JSON.parse(saved)); } catch(e) {}
+      }
+    };
+    fetchToppers();
+  }, []);
 
   const classes = ["All", "Class I", "Class II", "Class III", "Class IV", "Class V", "Class VI", "Class VII", "Class VIII", "Class IX", "Class X"];
 
-  const filteredMembers = DEFAULT_HALL_OF_FAME.filter(m => {
+  const filteredMembers = members.filter(m => {
     const matchesYear = m.year === selectedYear;
     const matchesClass = selectedClass === "All" || m.classLevel === selectedClass;
     const matchesQuery = searchQuery === "" || 
