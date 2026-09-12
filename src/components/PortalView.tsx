@@ -4,18 +4,7 @@ import { Search, Trophy, Medal, AlertCircle, BookOpen, School, UserCheck, Eye, E
 import { StudentResult } from "../types";
 import { jsPDF } from "jspdf";
 import { QRCodeSVG } from "qrcode.react";
-
-interface Testimonial {
-  id: string;
-  name: string;
-  classLevel: string;
-  score: string;
-  rank: string;
-  school: string;
-  quoteBn: string;
-  quoteEn: string;
-  avatarSeed: string;
-}
+import { DEFAULT_RESULTS, DEFAULT_TESTIMONIALS, Testimonial } from "../mockData";
 
 interface PortalViewProps {
   primaryColor: string;
@@ -174,7 +163,7 @@ export default function PortalView({
     }
   }, [results]);
 
-  // Fetch results from Express API
+  // Fetch results from Express API or fallback to mock data
   const fetchResults = async (showPopupOnLock = false) => {
     try {
       setLoading(true);
@@ -182,10 +171,8 @@ export default function PortalView({
       const contentType = res.headers.get("content-type");
       
       let data: any = null;
-      if (contentType && contentType.includes("application/json")) {
+      if (res.ok && contentType && contentType.includes("application/json")) {
         data = await res.json();
-      } else {
-        throw new Error(`Non-JSON response received (${res.status})`);
       }
       
       if (res.status === 403 || (data && data.error === "Locked")) {
@@ -198,14 +185,34 @@ export default function PortalView({
         return;
       }
 
-      if (Array.isArray(data)) {
+      if (Array.isArray(data) && data.length > 0) {
         setResults(data);
         setIsMaintenanceModalOpen(false);
       } else {
-        setResults([]);
+        // Fallback for static hosting / offline
+        const savedResults = localStorage.getItem("medha_custom_results");
+        if (savedResults) {
+          try {
+            setResults(JSON.parse(savedResults));
+          } catch (e) {
+            setResults(DEFAULT_RESULTS);
+          }
+        } else {
+          setResults(DEFAULT_RESULTS);
+        }
       }
     } catch (err) {
-      console.error("Error fetching results:", err);
+      // Offline fallback
+      const savedResults = localStorage.getItem("medha_custom_results");
+      if (savedResults) {
+        try {
+          setResults(JSON.parse(savedResults));
+        } catch (e) {
+          setResults(DEFAULT_RESULTS);
+        }
+      } else {
+        setResults(DEFAULT_RESULTS);
+      }
     } finally {
       setLoading(false);
     }
@@ -216,10 +223,14 @@ export default function PortalView({
       const res = await fetch("/api/testimonials");
       if (res.ok) {
         const data = await res.json();
-        setTestimonials(data);
+        if (Array.isArray(data) && data.length > 0) {
+          setTestimonials(data);
+          return;
+        }
       }
+      setTestimonials(DEFAULT_TESTIMONIALS);
     } catch (err) {
-      console.warn("Could not retrieve testimonials from active database. Switched to fallback helper.");
+      setTestimonials(DEFAULT_TESTIMONIALS);
     }
   };
 

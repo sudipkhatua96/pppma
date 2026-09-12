@@ -3,6 +3,8 @@ import { MessageSquare, X, Send, Sparkles, HelpCircle, User, MessageCircle } fro
 import ReactMarkdown from "react-markdown";
 import { ChatMessage } from "../types";
 
+import { OFFLINE_AI_RESPONSES } from "../mockData";
+
 interface ChatbotProps {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
@@ -32,6 +34,23 @@ export default function Chatbot({ isOpen, setIsOpen, footerVisibleHeight }: Chat
     }
   }, [messages, isOpen]);
 
+  const getSmartOfflineReply = (query: string): string => {
+    const q = query.toLowerCase();
+    if (q.includes("date") || q.includes("তারিখ") || q.includes("when") || q.includes("schedule") || q.includes("কখন")) {
+      return OFFLINE_AI_RESPONSES.exam_date;
+    }
+    if (q.includes("syllabus") || q.includes("সিলেবাস") || q.includes("subject") || q.includes("mark") || q.includes("নম্বর")) {
+      return OFFLINE_AI_RESPONSES.syllabus;
+    }
+    if (q.includes("result") || q.includes("ফলাফল") || q.includes("check") || q.includes("roll") || q.includes("certificate") || q.includes("রোল")) {
+      return OFFLINE_AI_RESPONSES.results;
+    }
+    if (q.includes("who") || q.includes("developer") || q.includes("design") || q.includes("sudip") || q.includes("কে বানিয়ে")) {
+      return OFFLINE_AI_RESPONSES.developer;
+    }
+    return `নমস্কার! মেধা অন্বেষা ২০২৬ পরীক্ষার বিস্তারিত তথ্য:\n- 📅 **পরীক্ষার তারিখ:** ২৯শে নভেম্বর, ২০২৬\n- 🔍 **ফলাফল:** হোমপেজে রোল নম্বর দিয়ে সার্চ করুন\n- 📚 **সিলেবাস:** আর্কাইভ সেকশন থেকে ডাউনলোড করুন\n- 💡 সহায়তার জন্য: **sudipkhatua808@gmail.com**\n\n*(Active Assistant Mode)*`;
+  };
+
   const handleSend = async (textToSend: string) => {
     if (!textToSend.trim()) return;
 
@@ -47,7 +66,6 @@ export default function Chatbot({ isOpen, setIsOpen, footerVisibleHeight }: Chat
     setIsLoading(true);
 
     try {
-      // Map message history for backend
       const history = messages.slice(-6).map(m => ({ sender: m.sender, text: m.text }));
 
       const res = await fetch("/api/ai/chat", {
@@ -56,22 +74,35 @@ export default function Chatbot({ isOpen, setIsOpen, footerVisibleHeight }: Chat
         body: JSON.stringify({ prompt: textToSend, history })
       });
 
-      const data = await res.json();
+      if (res.ok) {
+        const data = await res.json();
+        if (data.reply) {
+          const botMessage: ChatMessage = {
+            id: `bot-${Date.now()}`,
+            sender: "bot",
+            text: data.reply,
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          };
+          setMessages((prev) => [...prev, botMessage]);
+          return;
+        }
+      }
 
+      // Offline smart fallback
+      const smartReply = getSmartOfflineReply(textToSend);
       const botMessage: ChatMessage = {
         id: `bot-${Date.now()}`,
         sender: "bot",
-        text: data.reply || "Sorry, I am offline. Please verify results directly on the portal.",
+        text: smartReply,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
-
       setMessages((prev) => [...prev, botMessage]);
     } catch (err) {
-      console.error(err);
+      const smartReply = getSmartOfflineReply(textToSend);
       const errorMessage: ChatMessage = {
-        id: `err-${Date.now()}`,
+        id: `bot-${Date.now()}`,
         sender: "bot",
-        text: "Error reaching the AI client. Please connect with the developer **Sudip Khatua** (sudipkhatua808@gmail.com) or search results directly on the dashboard.",
+        text: smartReply,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
       setMessages((prev) => [...prev, errorMessage]);

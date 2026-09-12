@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Download, FileText, Calendar, Filter, Search, Award, HelpCircle, ArrowRight } from "lucide-react";
 import { NoticeOrArchive } from "../types";
+import { DEFAULT_ARCHIVES } from "../mockData";
 
 export default function ArchiveView() {
   const [archives, setArchives] = useState<NoticeOrArchive[]>([]);
@@ -14,10 +15,16 @@ export default function ArchiveView() {
     try {
       setLoading(true);
       const res = await fetch("/api/archives");
-      const data = await res.json();
-      setArchives(data);
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+          setArchives(data);
+          return;
+        }
+      }
+      setArchives(DEFAULT_ARCHIVES);
     } catch (err) {
-      console.error("Error reading archives", err);
+      setArchives(DEFAULT_ARCHIVES);
     } finally {
       setLoading(false);
     }

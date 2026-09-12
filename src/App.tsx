@@ -41,7 +41,8 @@ const INITIAL_SETTINGS: PortalSettings = {
   heroImageUrl: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=1200",
   officialLogo: "",
   developerLogo: "",
-  scrolling_ticker_label: "সরাসরি খবর / LATEST NEWS"
+  scrolling_ticker_label: "সরাসরি খবর / LATEST NEWS",
+  is_results_live: true
 };
 
 type ViewState = "portal" | "archive" | "admin";
