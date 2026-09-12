@@ -1,11 +1,15 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { BookOpen, Award, CheckCircle, HelpCircle, Calendar, GraduationCap, ChevronRight, UserCheck, Phone, Mail, Clock, Sun, Moon, Eye, Sparkles, X, Bot, Share2 } from "lucide-react";
+import { BookOpen, Award, CheckCircle, HelpCircle, Calendar, GraduationCap, ChevronRight, UserCheck, Phone, Mail, Clock, Sun, Moon, Eye, Sparkles, X, Bot, Share2, Trophy, FileText, Ticket, UserPlus } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import Chatbot from "./components/Chatbot";
 import PortalView from "./components/PortalView";
 import ArchiveView from "./components/ArchiveView";
 import AdminDashboard from "./components/AdminDashboard";
+import MockTestView from "./components/MockTestView";
+import HallOfFameView from "./components/HallOfFameView";
+import RegistrationView from "./components/RegistrationView";
+import AdmitCardModal from "./components/AdmitCardModal";
 import ShareModal from "./components/ShareModal";
 import ParticleTrail from "./components/ParticleTrail";
 import CustomCursor from "./components/CustomCursor";
@@ -45,7 +49,7 @@ const INITIAL_SETTINGS: PortalSettings = {
   is_results_live: true
 };
 
-type ViewState = "portal" | "archive" | "admin";
+type ViewState = "portal" | "mock_test" | "hall_of_fame" | "registration" | "archive" | "admin";
 
 export default function App() {
   const [settings, setSettings] = useState<PortalSettings>(INITIAL_SETTINGS);
@@ -75,6 +79,7 @@ export default function App() {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [footerVisibleHeight, setFooterVisibleHeight] = useState(0);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [showAdmitCardModal, setShowAdmitCardModal] = useState(false);
 
   // Disable browser inspection tricks (Right clicks, F12, Ctrl+Shift+I, Ctrl+U)
   useEffect(() => {
@@ -367,43 +372,75 @@ export default function App() {
           </div>
 
           {/* Navigation selectors */}
-          <nav className="flex items-center gap-0.5 sm:gap-1 bg-slate-100 p-1 rounded-xl shadow-inner border border-gray-200">
+          <nav className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl shadow-inner border border-gray-200 overflow-x-auto max-w-full">
             <button
               onClick={() => setActiveView("portal")}
-              className={`px-2 sm:px-3.5 py-1.5 text-[10px] sm:text-xs font-extrabold rounded-lg transition-all ${
-                activeView === "portal" ? "btn-active-tab font-black" : "text-gray-500 hover:text-indigo-950"
+              className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all whitespace-nowrap cursor-pointer ${
+                activeView === "portal" ? "bg-indigo-950 text-amber-400 font-black shadow-sm" : "text-gray-600 hover:text-indigo-950"
               }`}
             >
-              ফলাফল পোর্টাল (Results)
+              🏠 ফলাফল (Results)
+            </button>
+            <button
+              onClick={() => setActiveView("mock_test")}
+              className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all whitespace-nowrap cursor-pointer ${
+                activeView === "mock_test" ? "bg-indigo-950 text-amber-400 font-black shadow-sm" : "text-gray-600 hover:text-indigo-950"
+              }`}
+            >
+              📝 মক টেস্ট (Mock Test)
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowAdmitCardModal(true)}
+              className="px-3 py-1.5 text-xs font-bold text-amber-900 bg-amber-100/90 hover:bg-amber-200 rounded-lg transition-all whitespace-nowrap cursor-pointer shadow-xs flex items-center gap-1"
+            >
+              <Ticket className="w-3.5 h-3.5 text-amber-600" />
+              <span>এডমিট কার্ড (Admit Card)</span>
+            </button>
+            <button
+              onClick={() => setActiveView("hall_of_fame")}
+              className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all whitespace-nowrap cursor-pointer ${
+                activeView === "hall_of_fame" ? "bg-indigo-950 text-amber-400 font-black shadow-sm" : "text-gray-600 hover:text-indigo-950"
+              }`}
+            >
+              🏆 হল অফ ফেম (Hall of Fame)
+            </button>
+            <button
+              onClick={() => setActiveView("registration")}
+              className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all whitespace-nowrap cursor-pointer ${
+                activeView === "registration" ? "bg-indigo-950 text-amber-400 font-black shadow-sm" : "text-gray-600 hover:text-indigo-950"
+              }`}
+            >
+              ✍️ রেজিস্ট্রেশন (Apply)
             </button>
             <button
               onClick={() => setActiveView("archive")}
-              className={`px-2 sm:px-3.5 py-1.5 text-[10px] sm:text-xs font-extrabold rounded-lg transition-all ${
-                activeView === "archive" ? "btn-active-tab font-black" : "text-gray-500 hover:text-indigo-950"
+              className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all whitespace-nowrap cursor-pointer ${
+                activeView === "archive" ? "bg-indigo-950 text-amber-400 font-black shadow-sm" : "text-gray-600 hover:text-indigo-950"
               }`}
             >
-              পরীক্ষা আর্কাইভ (Archive)
+              📚 আর্কাইভ (Archive)
             </button>
             <button
               onClick={() => setActiveView("admin")}
-              className={`px-2 sm:px-3.5 py-1.5 text-[10px] sm:text-xs font-extrabold rounded-lg transition-all ${
-                activeView === "admin" ? "btn-active-tab font-black" : "text-gray-500 hover:text-indigo-950"
+              className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all whitespace-nowrap cursor-pointer ${
+                activeView === "admin" ? "bg-indigo-950 text-amber-400 font-black shadow-sm" : "text-gray-600 hover:text-indigo-950"
               }`}
             >
-              এডমিন অফিস (Admin)
+              🔒 এডমিন (Admin)
             </button>
           </nav>
 
         </div>
       </header>
 
-      {/* Dynamic prestigious Hero Banner - Dynamic Full-Bleed Edge-to-Edge Hero Banner */}
+      {/* Dynamic prestigious Hero Banner */}
       {activeView === "portal" && (
         <section 
           id="medha-presidential-banner" 
-          className="relative w-full h-auto min-h-[300px] max-h-[420px] flex items-center bg-indigo-950 overflow-hidden shadow-xl border-b-4 border-amber-500"
+          className="relative w-full h-auto min-h-[300px] flex items-center bg-indigo-950 overflow-hidden shadow-xl border-b-4 border-amber-500"
         >
-          {/* High-res campaign image using object-fit: cover to fill beautiful containers dynamically */}
+          {/* High-res campaign image */}
           <img 
             src={settings.heroImageUrl || "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=1200"} 
             alt="Medha Anwesha Campaign Banner" 
@@ -411,7 +448,7 @@ export default function App() {
             referrerPolicy="no-referrer"
           />
 
-          {/* Rich semi-transparent dark indigo gradient backdrop layer for text high contrast */}
+          {/* Dark indigo gradient backdrop */}
           <div className="absolute inset-0 bg-gradient-to-r from-indigo-950 via-indigo-900/90 to-black/60 mix-blend-multiply pointer-events-none" />
           <div className="absolute inset-0 bg-black/45 pointer-events-none" />
           <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none hidden md:block">
@@ -473,6 +510,47 @@ export default function App() {
                     </p>
                   </div>
                 </div>
+
+                {/* Live Countdown Clock Widget */}
+                {(() => {
+                  const examTargetDate = new Date("2026-11-29T11:00:00+05:30").getTime();
+                  const diff = Math.max(0, examTargetDate - time.getTime());
+                  const daysLeft = Math.floor(diff / (1000 * 60 * 60 * 24));
+                  const hoursLeft = Math.floor((diff / (1000 * 60 * 60)) % 24);
+                  const minutesLeft = Math.floor((diff / 1000 / 60) % 60);
+                  const secondsLeft = Math.floor((diff / 1000) % 60);
+
+                  return (
+                    <div className="flex flex-col gap-1.5 p-3 rounded-xl bg-indigo-900/60 border border-indigo-700/80 sm:col-span-2">
+                      <div className="flex items-center justify-between text-[10px] text-amber-300 font-extrabold uppercase tracking-wider">
+                        <span className="flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping inline-block" />
+                          মেধা অন্বেষা ২০২৬ পরীক্ষার কাউন্টডাউন (Live Countdown)
+                        </span>
+                        <span className="text-[9px] text-white/80 font-mono">২৯ নভেম্বর, ২০২৬</span>
+                      </div>
+                      <div className="grid grid-cols-4 gap-2 text-center font-mono">
+                        <div className="bg-indigo-950/90 p-1.5 rounded-lg border border-indigo-800">
+                          <span className="text-base sm:text-lg font-black text-amber-400 block">{daysLeft}</span>
+                          <span className="text-[9px] text-gray-300 font-sans uppercase">দিন (Days)</span>
+                        </div>
+                        <div className="bg-indigo-950/90 p-1.5 rounded-lg border border-indigo-800">
+                          <span className="text-base sm:text-lg font-black text-amber-400 block">{hoursLeft.toString().padStart(2, '0')}</span>
+                          <span className="text-[9px] text-gray-300 font-sans uppercase">ঘণ্টা (Hrs)</span>
+                        </div>
+                        <div className="bg-indigo-950/90 p-1.5 rounded-lg border border-indigo-800">
+                          <span className="text-base sm:text-lg font-black text-amber-400 block">{minutesLeft.toString().padStart(2, '0')}</span>
+                          <span className="text-[9px] text-gray-300 font-sans uppercase">মিনিট (Min)</span>
+                        </div>
+                        <div className="bg-indigo-950/90 p-1.5 rounded-lg border border-indigo-800">
+                          <span className="text-base sm:text-lg font-black text-emerald-400 block">{secondsLeft.toString().padStart(2, '0')}</span>
+                          <span className="text-[9px] text-gray-300 font-sans uppercase">সেকেন্ড (Sec)</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
+
               </div>
             </div>
           </div>
@@ -502,6 +580,45 @@ export default function App() {
                   settings={settings}
                   themeMode={themeMode}
                 />
+              </motion.div>
+            )}
+
+            {activeView === "mock_test" && (
+              <motion.div
+                key="mock_test"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                transition={{ duration: 0.3, ease: 'easeInOut' }}
+                className="w-full"
+              >
+                <MockTestView />
+              </motion.div>
+            )}
+
+            {activeView === "hall_of_fame" && (
+              <motion.div
+                key="hall_of_fame"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                transition={{ duration: 0.3, ease: 'easeInOut' }}
+                className="w-full"
+              >
+                <HallOfFameView />
+              </motion.div>
+            )}
+
+            {activeView === "registration" && (
+              <motion.div
+                key="registration"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                transition={{ duration: 0.3, ease: 'easeInOut' }}
+                className="w-full"
+              >
+                <RegistrationView />
               </motion.div>
             )}
 
@@ -760,6 +877,12 @@ export default function App() {
 
         </div>
       </footer>
+
+      {/* Admit Card Download & Search Modal */}
+      <AdmitCardModal
+        isOpen={showAdmitCardModal}
+        onClose={() => setShowAdmitCardModal(false)}
+      />
 
       {/* Universal Share Modal Fallback */}
       <ShareModal

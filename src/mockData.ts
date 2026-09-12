@@ -12,6 +12,45 @@ export interface Testimonial {
   avatarSeed: string;
 }
 
+export interface MockQuestion {
+  id: string;
+  classLevel: string;
+  subject: "Bengali" | "Mathematics" | "Science" | "General Knowledge";
+  questionBn: string;
+  options: [string, string, string, string];
+  correctIndex: number;
+  explanationBn: string;
+}
+
+export interface HallOfFameMember {
+  id: string;
+  name: string;
+  year: number;
+  classLevel: string;
+  rank: 1 | 2 | 3;
+  score: number;
+  maxScore: number;
+  school: string;
+  trophyType: "gold" | "silver" | "bronze";
+  quoteBn: string;
+  achievementBadge: string;
+}
+
+export interface AdmitCardRecord {
+  rollNo: string;
+  name: string;
+  guardianName: string;
+  classLevel: string;
+  school: string;
+  centerName: string;
+  centerAddress: string;
+  roomNo: string;
+  seatNo: string;
+  examDate: string;
+  reportingTime: string;
+  examTime: string;
+}
+
 export const DEFAULT_RESULTS: StudentResult[] = [
   // Class I
   { id: "i-1", rollNo: "MA-2026-101", name: "Anish Roy", school: "Mayapur Primary School", classLevel: "Class I", marks: 48, rank: 1, status: "Passed", phone: "9876543201" },
@@ -106,9 +145,303 @@ export const DEFAULT_TESTIMONIALS: Testimonial[] = [
   }
 ];
 
+export const DEFAULT_HALL_OF_FAME: HallOfFameMember[] = [
+  {
+    id: "hof-1",
+    name: "Arpita Maiti",
+    year: 2025,
+    classLevel: "Class VIII",
+    rank: 1,
+    score: 49,
+    maxScore: 50,
+    school: "Palaspai High School",
+    trophyType: "gold",
+    quoteBn: "নিয়মিত অনুশীলন এবং সিলেবাস ভিত্তিক অধ্যয়নই সাফল্যের চাবিকাঠি।",
+    achievementBadge: "Gold Medalist (98% Score)"
+  },
+  {
+    id: "hof-2",
+    name: "Rahul Khatua",
+    year: 2025,
+    classLevel: "Class VI",
+    rank: 1,
+    score: 48,
+    maxScore: 50,
+    school: "Mayapur High School",
+    trophyType: "gold",
+    quoteBn: "বিজ্ঞান ও গণিতের লজিক্যাল সমস্যা সমাধানের আনন্দ অতুলনীয়।",
+    achievementBadge: "Champion Scholar"
+  },
+  {
+    id: "hof-3",
+    name: "Kushal Sen",
+    year: 2025,
+    classLevel: "Class X",
+    rank: 1,
+    score: 49,
+    maxScore: 50,
+    school: "Mayapur High School",
+    trophyType: "gold",
+    quoteBn: "কমিটির প্রশ্নপত্র অত্যন্ত মানসম্মত এবং মেধা বিকাশে দারুণ সহায়ক।",
+    achievementBadge: "Senior Category Topper"
+  },
+  {
+    id: "hof-4",
+    name: "Souvik Hazra",
+    year: 2025,
+    classLevel: "Class VIII",
+    rank: 2,
+    score: 48,
+    maxScore: 50,
+    school: "Khanakul Krishnanagar High School",
+    trophyType: "silver",
+    quoteBn: "পরবর্তী বছরগুলোতেও এই পরীক্ষায় অংশগ্রহণ করার ইচ্ছা আছে।",
+    achievementBadge: "Silver Medalist"
+  },
+  {
+    id: "hof-5",
+    name: "Tanaya Adhikari",
+    year: 2025,
+    classLevel: "Class VII",
+    rank: 2,
+    score: 47,
+    maxScore: 50,
+    school: "Arambagh Girls High School",
+    trophyType: "silver",
+    quoteBn: "মেয়েরা পড়াশোনায় কোনো অংশে কম নয়, মেধা অন্বেষা তার প্রমাণ দিয়েছে।",
+    achievementBadge: "Silver Medalist"
+  },
+  {
+    id: "hof-6",
+    name: "Sneha Pal",
+    year: 2025,
+    classLevel: "Class VIII",
+    rank: 3,
+    score: 47,
+    maxScore: 50,
+    school: "Arambagh Girls High School",
+    trophyType: "bronze",
+    quoteBn: "কমিটির অনুপ্রেরণায় ভবিষ্যতে বড় কিছু করার স্বপ্ন দেখছি।",
+    achievementBadge: "Bronze Medalist"
+  },
+  {
+    id: "hof-7",
+    name: "Anish Roy",
+    year: 2025,
+    classLevel: "Class I",
+    rank: 1,
+    score: 48,
+    maxScore: 50,
+    school: "Mayapur Primary School",
+    trophyType: "gold",
+    quoteBn: "ছোট বয়সে মেধা অন্বেষার মঞ্চে পুরস্কৃত হওয়া দারুণ অভিজ্ঞতা।",
+    achievementBadge: "Primary Star Award"
+  }
+];
+
+export const DEFAULT_MOCK_QUESTIONS: MockQuestion[] = [
+  // Class V - VIII
+  {
+    id: "mq-1",
+    classLevel: "Class V",
+    subject: "Bengali",
+    questionBn: "নিচের কোন বানানটি সঠিক?",
+    options: ["পুরষ্কার", "পুরস্কার", "পুরুস্কার", "পুরসকার"],
+    correctIndex: 1,
+    explanationBn: "সন্ধিজাত ও ব্যাকরণগত নিয়মে 'পুরস্কার' (দন্ত্য-স) বানানটি সঠিক।"
+  },
+  {
+    id: "mq-2",
+    classLevel: "Class V",
+    subject: "Mathematics",
+    questionBn: "একটি সমকোণী ত্রিভুজের একটি কোণ ৯০° হলে অপর দুটি কোণের সমষ্টি কত?",
+    options: ["৪৫°", "৬০°", "৯০°", "১৮০°"],
+    correctIndex: 2,
+    explanationBn: "ত্রিভুজের তিনটি কোণের সমষ্টি ১৮০°। একটি কোণ ৯০° হলে অপর দুটির সমষ্টি (১৮০° - ৯০°) = ৯০°।"
+  },
+  {
+    id: "mq-3",
+    classLevel: "Class V",
+    subject: "Science",
+    questionBn: "উদ্ভিদের খাদ্য তৈরির প্রক্রিয়ার নাম কী?",
+    options: ["শ্বসন", "সালোকসংশ্লেষ", "বাষ্পমোচন", "অঙ্কুরোদ্গম"],
+    correctIndex: 1,
+    explanationBn: "সূর্যালোকের উপস্থিতিতে ক্লোরোফিলের সাহায্যে উদ্ভিদের খাদ্য তৈরির প্রক্রিয়াকে সালোকসংশ্লেষ (Photosynthesis) বলে।"
+  },
+  {
+    id: "mq-4",
+    classLevel: "Class V",
+    subject: "General Knowledge",
+    questionBn: "পশ্চিমবঙ্গের রাজ্য পশুর নাম কী?",
+    options: ["রয়্যাল বেঙ্গল টাইগার", "মেছো বিড়াল (Fishing Cat)", "একশৃঙ্গ গণ্ডার", "হাতি"],
+    correctIndex: 1,
+    explanationBn: "পশ্চিমবঙ্গের সরকারি রাজ্য পশু হলো মেছো বিড়াল বা বাঘরোল।"
+  },
+  {
+    id: "mq-5",
+    classLevel: "Class VI",
+    subject: "Bengali",
+    questionBn: "'সূর্য' শব্দের একটি সমার্থক শব্দ কোনটি?",
+    options: ["শশী", "মার্তণ্ড", "অম্বু", "পবন"],
+    correctIndex: 1,
+    explanationBn: "'মার্তণ্ড' অর্থ সূর্য। 'শশী' হলো চাঁদ, 'অম্বু' হলো জল এবং 'পবন' হলো বাতাস।"
+  },
+  {
+    id: "mq-6",
+    classLevel: "Class VI",
+    subject: "Mathematics",
+    questionBn: "২, ৩, ৫, ৭, ১১, ১৩ — পরবর্তী মৌলিক সংখ্যাটি কোনটি?",
+    options: ["১৫", "১৭", "১৯", "২১"],
+    correctIndex: 1,
+    explanationBn: "১৩-এর পরবর্তী মৌলিক সংখ্যা হলো ১৭।"
+  },
+  {
+    id: "mq-7",
+    classLevel: "Class VI",
+    subject: "Science",
+    questionBn: "মানবদেহের বৃহত্তম গ্রন্থি (Gland) কোনটি?",
+    options: ["অগ্ন্যাশয়", "যকৃৎ (Liver)", "থাইরয়েড", "পিটুইটারি"],
+    correctIndex: 1,
+    explanationBn: "যকৃৎ (Liver) মানবদেহের বৃহত্তম পরিপাক গ্রন্থি।"
+  },
+  {
+    id: "mq-8",
+    classLevel: "Class VII",
+    subject: "Bengali",
+    questionBn: "'বিদ্যালয়' শব্দের সঠিক সন্ধি বিচ্ছেদ কোনটি?",
+    options: ["বিদ্যা + আলয়", "বিদ্য + আলয়", "বিদ্যা + লয়", "বিদ + আলয়"],
+    correctIndex: 0,
+    explanationBn: "বিদ্যা + আলয় = বিদ্যালয় (আ + আ = আ)।"
+  },
+  {
+    id: "mq-9",
+    classLevel: "Class VII",
+    subject: "Mathematics",
+    questionBn: "একটি বৃত্তের ব্যাসার্ধ ৭ সেমি হলে তার পরিধি কত? (ধরি π = ২২/৭)",
+    options: ["২২ সেমি", "৪৪ সেমি", "৮৮ সেমি", "১৫৪ সেমি"],
+    correctIndex: 1,
+    explanationBn: "পরিধি = ২ × π × r = ২ × (২২/৭) × ৭ = ৪৪ সেমি।"
+  },
+  {
+    id: "mq-10",
+    classLevel: "Class VII",
+    subject: "Science",
+    questionBn: "বায়ুমণ্ডলে কোন গ্যাসের পরিমাণ সবচেয়ে বেশি?",
+    options: ["অক্সিজেন", "নাইট্রোজেন", "কার্বন ডাই অক্সাইড", "আর্গন"],
+    correctIndex: 1,
+    explanationBn: "বায়ুমণ্ডলে নাইট্রোজেনের পরিমাণ প্রায় ৭৮.০৮%।"
+  },
+  {
+    id: "mq-11",
+    classLevel: "Class VIII",
+    subject: "Mathematics",
+    questionBn: "যদি x + 1/x = 3 হয়, তবে x² + 1/x² এর মান কত?",
+    options: ["৭", "৯", "১১", "৬"],
+    correctIndex: 0,
+    explanationBn: "x² + 1/x² = (x + 1/x)² - 2 = 3² - 2 = 9 - 2 = 7।"
+  },
+  {
+    id: "mq-12",
+    classLevel: "Class VIII",
+    subject: "Science",
+    questionBn: "শব্দের গতিবেগ কোন মাধ্যমে সর্বাধিক?",
+    options: ["বায়ু", "জল", "কঠিন লোহা", "শূন্যস্থান"],
+    correctIndex: 2,
+    explanationBn: "কঠিন মাধ্যমে (যেমন লোহা বা ইস্পাত) শব্দের গতিবেগ সর্বাধিক (প্রায় ৫০০০+ মি/সে)।"
+  },
+  {
+    id: "mq-13",
+    classLevel: "Class VIII",
+    subject: "General Knowledge",
+    questionBn: "রামমোহন রায়কে 'রাজা' উপাধি কে দিয়েছিলেন?",
+    options: ["মুঘল সম্রাট দ্বিতীয় আকবর", "লর্ড বেন্টিঙ্ক", "রবীন্দ্রনাথ ঠাকুর", "বিদ্যাসাগর"],
+    correctIndex: 0,
+    explanationBn: "১৮৩১ সালে দিল্লির মুঘল সম্রাট দ্বিতীয় আকবর রামমোহন রায়কে 'রাজা' উপাধি প্রদান করেন।"
+  },
+  {
+    id: "mq-14",
+    classLevel: "Class IX",
+    subject: "Science",
+    questionBn: "বলের একক এস.আই (S.I) পদ্ধতিতে কী?",
+    options: ["ডাইন", "নিউটন", "জুল", "ওয়াট"],
+    correctIndex: 1,
+    explanationBn: "S.I পদ্ধতিতে বলের একক নিউটন (Newton) এবং C.G.S পদ্ধতিতে ডাইন।"
+  },
+  {
+    id: "mq-15",
+    classLevel: "Class X",
+    subject: "Mathematics",
+    questionBn: "দ্বিঘাত সমীকরণ ax² + bx + c = 0 এর বীজদ্বয় সমান হওয়ার শর্ত কী?",
+    options: ["b² - 4ac > 0", "b² - 4ac = 0", "b² - 4ac < 0", "b = 0"],
+    correctIndex: 1,
+    explanationBn: "নিরূপক (Discriminant) b² - 4ac = 0 হলে দ্বিঘাত সমীকরণের বীজদ্বয় বাস্তব ও সমান হয়।"
+  }
+];
+
+export const DEFAULT_ADMIT_CARDS: Record<string, AdmitCardRecord> = {
+  "MA-2026-601": {
+    rollNo: "MA-2026-601",
+    name: "Rahul Khatua",
+    guardianName: "Santanu Khatua",
+    classLevel: "Class VI",
+    school: "Mayapur High School",
+    centerName: "Mayapur High School Center",
+    centerAddress: "Mayapur, Hooghly, West Bengal - 712413",
+    roomNo: "Room No. 04 (First Floor)",
+    seatNo: "Bench B-12",
+    examDate: "রবিবার, ২৯শে নভেম্বর, ২০২৬",
+    reportingTime: "সকাল ১০:৩০ টা",
+    examTime: "সকাল ১১:০০ টা - দুপুর ১:০০ টা"
+  },
+  "MA-2026-801": {
+    rollNo: "MA-2026-801",
+    name: "Arpita Maiti",
+    guardianName: "Bimal Maiti",
+    classLevel: "Class VIII",
+    school: "Palaspai High School",
+    centerName: "Palaspai High School Campus",
+    centerAddress: "Palaspai, Khanakul, Hooghly - 712417",
+    roomNo: "Room No. 08 (Main Block)",
+    seatNo: "Bench A-03",
+    examDate: "রবিবার, ২৯শে নভেম্বর, ২০২৬",
+    reportingTime: "সকাল ১০:৩০ টা",
+    examTime: "সকাল ১১:০০ টা - দুপুর ১:০০ টা"
+  },
+  "MA-2026-701": {
+    rollNo: "MA-2026-701",
+    name: "Subhadip Dutta",
+    guardianName: "Prabir Dutta",
+    classLevel: "Class VII",
+    school: "Harinkhola High School",
+    centerName: "Harinkhola High School Center",
+    centerAddress: "Harinkhola, Arambagh, Hooghly - 712412",
+    roomNo: "Room No. 02",
+    seatNo: "Bench C-05",
+    examDate: "রবিবার, ২৯শে নভেম্বর, ২০২৬",
+    reportingTime: "সকাল ১০:৩০ টা",
+    examTime: "সকাল ১১:০০ টা - দুপুর ১:০০ টা"
+  },
+  "MA-2026-501": {
+    rollNo: "MA-2026-501",
+    name: "Sourav Das",
+    guardianName: "Ashok Das",
+    classLevel: "Class V",
+    school: "Palaspai High School",
+    centerName: "Palaspai High School Campus",
+    centerAddress: "Palaspai, Khanakul, Hooghly - 712417",
+    roomNo: "Room No. 01 (Ground Floor)",
+    seatNo: "Bench A-08",
+    examDate: "রবিবার, ২৯শে নভেম্বর, ২০২৬",
+    reportingTime: "সকাল ১০:৩০ টা",
+    examTime: "সকাল ১১:০০ টা - দুপুর ১:০০ টা"
+  }
+};
+
 export const OFFLINE_AI_RESPONSES: Record<string, string> = {
   exam_date: "📅 **মেধা অন্বেষা ২০২৬ পরীক্ষার সময়সূচি (Exam Schedule):**\n- **তারিখ:** রবিবার, ২৯শে নভেম্বর, ২০২৬ (Sunday, November 29, 2026)\n- **সময়:** সকাল ১১:০০ টা থেকে দুপুর ১:০০ টা (২ ঘণ্টা)\n- **পরীক্ষাকেন্দ্র:** সংশ্লিষ্ট নির্ধারিত বিদ্যালয় ও কেন্দ্রসমূহ।",
   syllabus: "📚 **মেধা অন্বেষা ২০২৬ সিলেবাস ও মানবণ্টন (Syllabus & Marks Distribution):**\n- **বাংলা ব্যাকরণ ও সাহিত্য:** ২০%\n- **গণিত ও লজিক্যাল রিজনিং:** ৩০%\n- **সাধারণ বিজ্ঞান ও পরিবেশ:** ৩০%\n- **সাধারণ জ্ঞান ও স্থানীয় ঐতিহ্য:** ২০%\n- **মোট পূর্ণমান:** ৫০ নম্বর (MCQ)\n- **সময়কাল:** ২ ঘণ্টা",
   results: "🔍 **ফলাফল দেখার নিয়ম (How to Check Results):**\n১. ফলাফল অনুসন্ধান বক্সে আপনার **রোল নম্বর (যেমন: `MA-2026-601`)** অথবা আপনার **নাম** লিখুন।\n২. 'ফলাফল অনুসন্ধান' বাটনে ক্লিক করুন।\n৩. আপনার ডিজিটাল সার্টিফিকেট ও নম্বরপত্র দেখতে পাবেন এবং PDF ডাউনলোড করতে পারবেন।",
+  admit_card: "🎫 **ডিজিটাল এডমিট কার্ড ডাউনলোড (Admit Card):**\n১. উপরের 'এডমিট কার্ড' ট্যাবে ক্লিক করুন।\n২. আপনার রোল নম্বর (যেমন: `MA-2026-601`) বা নাম লিখে সার্চ করুন।\n৩. আপনার পরীক্ষাকেন্দ্র, আসন নম্বর ও নির্দেশাবলী সহ এডমিট কার্ডটি ডাউনলোড বা প্রিন্ট করে নিন।",
+  mock_test: "📝 **অনলাইন মক টেস্ট (Mock Test Practice):**\n১. 'মক টেস্ট' ট্যাবে যান এবং আপনার ক্লাস সিলেক্ট করুন।\n২. ১০ মিনিটের টাইমারযুক্ত এমসিকিউ কুইজে অংশ নিন।\n৩. তাৎক্ষণিক স্কোর, সঠিক উত্তর এবং ব্যাখ্যা দেখতে পাবেন।",
   developer: "👨‍💻 **ওয়েবসাইট ডিজাইন ও প্রযুক্তি অংশীদার:**\n- **ডেভেলপার:** Sudip Khatua ([www.xestus.in](https://www.xestus.in))\n- **যোগাযোগ:** sudipkhatua808@gmail.com / xestus.office@gmail.com\n- **সংস্থা:** Pindrui Purba Para Medha Anwesha Committee"
 };

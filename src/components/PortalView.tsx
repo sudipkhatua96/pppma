@@ -36,6 +36,8 @@ export default function PortalView({
   const [results, setResults] = useState<StudentResult[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchClass, setSearchClass] = useState("All");
+  const [searchSchool, setSearchSchool] = useState("All");
+  const [speaking, setSpeaking] = useState(false);
   const [activeTab, setActiveTab] = useState<"search" | "leaderboard" | "all">("search");
   const [individualSearch, setIndividualSearch] = useState("");
   const [foundStudent, setFoundStudent] = useState<StudentResult | null>(null);
@@ -618,6 +620,39 @@ export default function PortalView({
     }
   };
 
+  const speakBengaliText = (text: string) => {
+    if (!('speechSynthesis' in window)) {
+      triggerToast("আপনার ব্রাউজারে ভয়েস ফিচার সাপোর্ট করছে না।", "info");
+      return;
+    }
+    if (speaking) {
+      window.speechSynthesis.cancel();
+      setSpeaking(false);
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+    const cleanText = text.replace(/[*#_`]/g, '');
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    utterance.lang = "bn-IN";
+    utterance.rate = 0.95;
+    
+    const voices = window.speechSynthesis.getVoices();
+    const bnVoice = voices.find(v => v.lang.includes("bn") || v.lang.includes("ben"));
+    if (bnVoice) {
+      utterance.voice = bnVoice;
+    }
+
+    utterance.onend = () => setSpeaking(false);
+    utterance.onerror = () => setSpeaking(false);
+
+    setSpeaking(true);
+    window.speechSynthesis.speak(utterance);
+    triggerToast("ভয়েস অডিও প্লে হচ্ছে... (Speaking Bengali)", "info");
+  };
+
+  const uniqueSchools = Array.from(new Set(results.map(r => r.school))).filter(Boolean);
+
   // Filter students for master list transparency
   const filteredAllStudents = results.filter((student) => {
     const matchesSearch = 
@@ -626,8 +661,9 @@ export default function PortalView({
       student.school.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesClass = searchClass === "All" || student.classLevel === searchClass;
+    const matchesSchool = searchSchool === "All" || student.school === searchSchool;
     
-    return matchesSearch && matchesClass;
+    return matchesSearch && matchesClass && matchesSchool;
   }).sort((a, b) => a.classLevel.localeCompare(b.classLevel) || a.rank - b.rank);
 
   // Group by class for Leaderboards (Top 3 only)
@@ -650,16 +686,19 @@ export default function PortalView({
   };
 
   const getAnalytics = () => {
-    const total = results.length;
-    if (total === 0) return { total: 0, passRate: 0, average: 0 };
-    const passed = results.filter(r => r.status === "Passed").length;
-    const sumMarks = results.reduce((sum, r) => sum + r.marks, 0);
+    const targetSet = searchSchool === "All" ? results : results.filter(r => r.school === searchSchool);
+    const total = targetSet.length;
+    if (total === 0) return { total: 0, passRate: "0.00", average: "0.00", maxMarks: 0 };
+    const passed = targetSet.filter(r => r.status === "Passed").length;
+    const sumMarks = targetSet.reduce((sum, r) => sum + r.marks, 0);
+    const maxMarks = Math.max(...targetSet.map(r => r.marks), 0);
     const avg = (sumMarks / total).toFixed(2);
     const rate = ((passed / total) * 100).toFixed(2);
     return {
       total,
       passRate: rate,
-      average: avg
+      average: avg,
+      maxMarks
     };
   };
 
@@ -1609,7 +1648,7 @@ export default function PortalView({
                 </div>
 
                 {/* Filters */}
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <select
                     value={searchClass}
                     onChange={(e) => setSearchClass(e.target.value)}
@@ -1628,18 +1667,45 @@ export default function PortalView({
                     <option value="Class X">Class X</option>
                   </select>
 
+                  <select
+                    value={searchSchool}
+                    onChange={(e) => setSearchSchool(e.target.value)}
+                    className="text-xs px-2.5 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-amber-500 text-indigo-950 bg-white font-sans font-semibold cursor-pointer max-w-[180px] truncate"
+                  >
+                    <option value="All">🏫 সমস্ত বিদ্যালয় (All Schools)</option>
+                    {uniqueSchools.map(sch => (
+                      <option key={sch} value={sch}>{sch}</option>
+                    ))}
+                  </select>
+
                   <div className="relative">
                     <Search className="absolute left-2.5 top-2 w-3.5 h-3.5 text-gray-400" />
                     <input
                       type="text"
-                      placeholder="স্কুল বা নাম খুঁজুন..."
+                      placeholder="নাম বা রোল খুঁজুন..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-8 pr-3 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-amber-500 w-44"
+                      className="pl-8 pr-3 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-amber-500 w-36 sm:w-44"
                     />
                   </div>
                 </div>
               </div>
+
+              {/* Selected School Summary Badge */}
+              {searchSchool !== "All" && (
+                <div className="p-4 bg-amber-50/80 border-b border-amber-200 flex flex-wrap items-center justify-between gap-3 text-xs">
+                  <div className="flex items-center gap-2">
+                    <span className="font-extrabold text-indigo-950">🏫 {searchSchool}</span>
+                    <span className="text-[10px] px-2 py-0.5 bg-amber-200 text-amber-900 rounded-full font-bold">স্কুল পারফরম্যান্স</span>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-4 text-slate-800 font-bold">
+                    <span>মোট ছাত্রছাত্রী: <strong className="text-indigo-950 font-mono">{analytics.total}</strong></span>
+                    <span>পাসের হার: <strong className="text-emerald-700 font-mono">{analytics.passRate}%</strong></span>
+                    <span>গড় নম্বর: <strong className="text-indigo-900 font-mono">{analytics.average}</strong></span>
+                    <span>সর্বোচ্চ নম্বর: <strong className="text-amber-700 font-mono">{analytics.maxMarks} / ৫০</strong></span>
+                  </div>
+                </div>
+              )}
 
               {/* Table rendering */}
               <div className="overflow-x-auto">

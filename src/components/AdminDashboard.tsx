@@ -769,7 +769,7 @@ export default function AdminDashboard({ settings, onRefreshSettings, showToast 
         triggerToast(data.message || "Failed to toggle prize status.", "error");
       }
     } catch (err) {
-      const updated = results.map(r => r.id === studentId ? { ...r, isPrizeWinner: !r.isPrizeWinner } : r);
+      const updated = results.map(r => r.id === studentId ? { ...r, is_prize_winner: !r.is_prize_winner } : r);
       setResults(updated);
       localStorage.setItem("medha_custom_results", JSON.stringify(updated));
       triggerToast("Prize winner status updated! (Local)", "success");
